@@ -28,7 +28,7 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 | HU5 [done]        | As a user, screen vs. window geometry is captured | `screen_width`, `window_inner_width` are distinct (when toolbar is present) |
 | HU6 [done]        | As a user, WebRTC attempts to collect my real IP | `webrtc.local_ips[]` populated if WebRTC is not blocked |
 | HU7 [done]        | As a user, WebGL vendor/renderer is collected | `webgl.vendor` and `webgl.renderer` present |
-| HU8 [pending]     | As a system, all collectors run in parallel and the payload is sent to the backend | `Promise.all()` → POST in < 3s |
+| HU8 [done]        | As a system, all collectors run in parallel and the payload is sent to the backend | `Promise.all()` → POST in < 3s |
 
 ---
 
