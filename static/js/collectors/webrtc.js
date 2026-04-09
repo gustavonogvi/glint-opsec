@@ -39,8 +39,8 @@ function isMDNS(candidate) {
 function extractIPs(candidateString) {
     const ipv4 = /([0-9]{1,3}(?:\.[0-9]{1,3}){3})/g;
     const ipv6 = /([0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{0,4}){2,7})/g;
-    const v4 = candidateString.match(ipv4);
-    const v6 = candidateString.match(ipv6);
+    const v4 = candidateString.match(ipv4) || [];
+    const v6 = candidateString.match(ipv6) || [];
     return [...v4, ...v6];
 }
 
@@ -54,7 +54,7 @@ export async function collectWebRTC() {
             return { local_ips: [], public_ip_via_stun: null, webrtc_blocked: true, mdns_protected: false };
         }
 
-        const localIPs = new Set();
+        const localIPs = new Map();
         let publicIP = null;
         let mdnsProtected = false;
         const mdnsHostnames = new Set();
@@ -90,8 +90,11 @@ export async function collectWebRTC() {
                 const ips = extractIPs(candidate);
 
                 ips.forEach(function(ip) {
+                    if (ip === "0.0.0.0" || ip === "0:0:0:0:0:0:0:0" || ip === "::") {
+                        return;
+                    }
                     if (isPrivateIP(ip)) {
-                        localIPs.add({ ip: ip, type: classifyIP(ip) });
+                        localIPs.set(ip, { ip: ip, type: classifyIP(ip) });
                     } else {
                         publicIP = ip;
                     }
@@ -102,7 +105,7 @@ export async function collectWebRTC() {
         pc.close();
 
         return {
-            local_ips:          Array.from(localIPs),
+            local_ips:          Array.from(localIPs.values()),
             public_ip_via_stun: publicIP,
             mdns_hostnames:     Array.from(mdnsHostnames),
             webrtc_blocked:     false,
