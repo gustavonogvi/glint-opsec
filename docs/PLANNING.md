@@ -25,8 +25,8 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 | HU2 [done]        | As a user, my AudioContext fingerprint is collected | `audio_hash` present in the payload |
 | HU3 [done]        | As a user, my installed font list is enumerated | `fonts[]` detected, `font_groups[]` with software signatures (ms_office, adobe_cc, coding, etc.), `fonts_blocked` flag if browser normalizes measurements |
 | HU4 [done]        | As a user, `navigator` properties are collected | UA, language, platform, hardwareConcurrency, timezone present |
-| HU5 [in progress] | As a user, screen vs. window geometry is captured | `screen_width`, `window_inner_width` are distinct (when toolbar is present) |
-| HU6 [pending]     | As a user, WebRTC attempts to collect my real IP | `webrtc.local_ips[]` populated if WebRTC is not blocked |
+| HU5 [done]        | As a user, screen vs. window geometry is captured | `screen_width`, `window_inner_width` are distinct (when toolbar is present) |
+| HU6 [in progress] | As a user, WebRTC attempts to collect my real IP | `webrtc.local_ips[]` populated if WebRTC is not blocked |
 | HU7 [pending]     | As a user, WebGL vendor/renderer is collected | `webgl.vendor` and `webgl.renderer` present |
 | HU8 [pending]     | As a system, all collectors run in parallel and the payload is sent to the backend | `Promise.all()` → POST in < 3s |
 
