@@ -1,20 +1,23 @@
 export function collectScreen() {
     try {
+        const s = window.screen;
         return {
-            screen_width:        window.screen.width,
-            screen_height:       window.screen.height,
-            avail_width:         window.screen.availWidth,
-            avail_height:        window.screen.availHeight,
-            window_inner_width:  window.innerWidth,
-            window_inner_height: window.innerHeight,
-            window_outer_width:  window.outerWidth,
-            window_outer_height: window.outerHeight,
-            color_depth:         window.screen.colorDepth,
-            pixel_ratio:         window.devicePixelRatio,
-            orientation:         screen.orientation.type,
+            screen_width:        s?.width ?? null,
+            screen_height:       s?.height ?? null,
+            avail_width:         s?.availWidth ?? null,
+            avail_height:        s?.availHeight ?? null,
+            window_inner_width:  window.innerWidth ?? null,
+            window_inner_height: window.innerHeight ?? null,
+            window_outer_width:  window.outerWidth ?? null,
+            window_outer_height: window.outerHeight ?? null,
+            color_depth:         s?.colorDepth ?? null,
+            pixel_ratio:         window.devicePixelRatio ?? null,
+            orientation:         s.orientation?.type ?? null, 
+
         };
 
-    } catch (_) {
-        return null;
+    } catch (error) {
+        console.warn(error)
+        return {error: "permission_denied_or_unsupported"};
     }
 }
