@@ -22,9 +22,8 @@ def create_app(config: Config | None = None) -> Flask:
     with sqlite3.connect(cfg.DATABASE_PATH) as conn:
         create_tables(conn)
 
-    # Register blueprints (added per phase)
-    # from .api.fingerprint import bp as fingerprint_bp
-    # app.register_blueprint(fingerprint_bp)
+    from .api.fingerprint import bp as fingerprint_bp
+    app.register_blueprint(fingerprint_bp)
 
     @app.route("/")
     def index():
