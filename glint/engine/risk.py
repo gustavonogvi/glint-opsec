@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
-from glint.collectors.http_headers import HeaderAnalysis, analyze as analyze_headers
-from glint.collectors.ip_reputation import IPReputation, collect as collect_ip
+from glint.collectors.http_headers import analyze as analyze_headers
+from glint.collectors.ip_reputation import collect as collect_ip
 from glint.collectors.dns_leak import collect as collect_dns
 from glint.engine import dimensions
 from glint.engine import entropy
+from glint.engine import hardening
 from glint.engine.dimensions import Finding, DimensionScore
 
 
@@ -33,6 +34,7 @@ class ScanResult:
     identity_entropy_score: float
     dimensions: list[DimensionScore]
     findings: list[Finding]
+    recommendations: list[dict] = field(default_factory=list)
     server_observed: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
@@ -49,7 +51,8 @@ class ScanResult:
                 }
                 for d in self.dimensions
             ],
-            "findings": [_finding_to_dict(f) for f in self.findings],
+            "findings":        [_finding_to_dict(f) for f in self.findings],
+            "recommendations": self.recommendations,
             "server_observed": self.server_observed,
         }
 
@@ -66,11 +69,13 @@ def _finding_to_dict(f: Finding) -> dict:
     }
 
 
-def run(scan_id: str, payload: dict, remote_ip: str, request,
-        clean_resolvers: list[str] | None = None) -> ScanResult:
+def run(scan_id: str, payload: dict, remote_ip: str,
+        request_headers: dict,
+        clean_resolvers: list[str] | None = None,
+        weights: dict[str, float] | None = None) -> ScanResult:
     browser = payload.get("browser", {})
 
-    headers       = analyze_headers(request, browser)
+    headers       = analyze_headers(request_headers, browser)
     ip_rep        = collect_ip(remote_ip)
     dns_result    = collect_dns(clean_resolvers or [])
     entropy_score = entropy.calculate(browser)
@@ -82,8 +87,10 @@ def run(scan_id: str, payload: dict, remote_ip: str, request,
 
     all_dimensions = [dim_anonymity, dim_network, dim_data_exposure, dim_ip_reputation]
 
+    active_weights = weights if weights else WEIGHTS
+
     composite = sum(
-        d.score * WEIGHTS[d.name]
+        d.score * active_weights[d.name]
         for d in all_dimensions
     )
     composite = round(min(composite, 100.0), 2)
@@ -92,9 +99,11 @@ def run(scan_id: str, payload: dict, remote_ip: str, request,
     for d in all_dimensions:
         all_findings.extend(d.findings)
 
+    recommendations = hardening.generate([_finding_to_dict(f) for f in all_findings])
+
     server_observed = {
         "remote_ip":    remote_ip,
-        "user_agent":   request.headers.get("User-Agent", "unknown"),
+        "user_agent":   request_headers.get("User-Agent", "unknown"),
         "ip_reputation": {
             "country":      ip_rep.country,
             "country_code": ip_rep.country_code,
@@ -119,5 +128,6 @@ def run(scan_id: str, payload: dict, remote_ip: str, request,
         identity_entropy_score=entropy_score,
         dimensions=all_dimensions,
         findings=all_findings,
+        recommendations=recommendations,
         server_observed=server_observed,
     )

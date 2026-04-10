@@ -24,8 +24,10 @@ def create_app(config: Config | None = None) -> Flask:
 
     from .api.fingerprint import bp as fingerprint_bp
     from .api.osint import bp as osint_bp
+    from .api.scan import bp as scan_bp
     app.register_blueprint(fingerprint_bp)
     app.register_blueprint(osint_bp)
+    app.register_blueprint(scan_bp)
 
     @app.route("/")
     def index():

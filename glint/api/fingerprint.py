@@ -1,6 +1,4 @@
 import uuid
-import json
-import sqlite3
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
 from glint.engine.risk import run as run_risk
@@ -39,8 +37,16 @@ def receive():
     user_agent = request.headers.get("User-Agent", "unknown")
     created_at = datetime.now(timezone.utc).isoformat()
 
-    cfg    = current_app.config["GLINT_CONFIG"]
-    result = run_risk(scan_id, payload, remote_ip, request, cfg.CLEAN_RESOLVERS)
+    cfg             = current_app.config["GLINT_CONFIG"]
+    request_headers = dict(request.headers)
+    result          = run_risk(
+        scan_id,
+        payload,
+        remote_ip,
+        request_headers,
+        cfg.CLEAN_RESOLVERS,
+        cfg.RISK_WEIGHTS,
+    )
 
     repo = ScanRepository(cfg.DATABASE_PATH)
     repo.save(

@@ -1,5 +1,4 @@
-from dataclasses import dataclass, field
-from flask import Request
+from dataclasses import dataclass
 
 
 @dataclass
@@ -11,9 +10,9 @@ class HeaderAnalysis:
     lang_navigator: str | None
 
 
-def analyze(request: Request, browser: dict) -> HeaderAnalysis:
-    accept_language = request.headers.get("Accept-Language")
-    user_agent      = request.headers.get("User-Agent")
+def analyze(headers: dict, browser: dict) -> HeaderAnalysis:
+    accept_language = headers.get("Accept-Language")
+    user_agent      = headers.get("User-Agent")
 
     lang_header    = _parse_primary_lang(accept_language)
     lang_navigator = _parse_primary_lang(
