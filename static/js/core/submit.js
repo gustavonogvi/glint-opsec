@@ -2,14 +2,10 @@ import { collectFingerprint } from "./fingerprint.js";
 
 function log(message, color) {
     const logs = document.getElementById("logs");
-    if (!logs) {
-        return;
-    }
+    if (!logs) return;
     const line = document.createElement("p");
-    line.style.margin = "0.15rem 0";
-    if (color) {
-        line.style.color = color;
-    }
+    line.style.margin = "0.1rem 0";
+    if (color) line.style.color = color;
     line.textContent = "> " + message;
     logs.appendChild(line);
     logs.parentElement.scrollTop = logs.scrollHeight;
@@ -17,53 +13,136 @@ function log(message, color) {
 
 function setStatus(message, color) {
     const el = document.getElementById("scan-status");
-    if (!el) {
-        return;
-    }
+    if (!el) return;
     el.textContent = message;
-    if (color) {
-        el.style.color = color;
+    if (color) el.style.color = color;
+}
+
+function trunc(str, len) {
+    if (!str) return "—";
+    return String(str).length > len ? String(str).slice(0, len) + "…" : String(str);
+}
+
+function onProgress(name, result) {
+    switch (name) {
+        case "canvas":
+            if (result.canvas_blocked) {
+                log("canvas        [BLOCKED]", "#004d18");
+            } else {
+                log("canvas        " + trunc(result.canvas_hash, 16) + "  [fingerprinted]");
+            }
+            break;
+
+        case "audio":
+            if (result.audio_blocked) {
+                log("audio         [BLOCKED]", "#004d18");
+            } else {
+                log("audio         " + trunc(result.audio_hash, 16) + "  [fingerprinted]");
+            }
+            break;
+
+        case "fonts": {
+            const count  = result.font_count || 0;
+            const sample = (result.fonts || []).slice(0, 3).join(", ");
+            const more   = count > 3 ? " +" + (count - 3) + " more" : "";
+            if (result.fonts_blocked) {
+                log("fonts         [BLOCKED]", "#004d18");
+            } else {
+                log("fonts         " + count + " detected — " + sample + more);
+            }
+            break;
+        }
+
+        case "navigator": {
+            const lang = result.language || "?";
+            const plat = result.platform || "?";
+            const cpu  = result.hardware_concurrency || "?";
+            const mem  = result.device_memory ? result.device_memory + "GB" : "?";
+            const tz   = result.timezone || "?";
+            log("navigator     " + lang + " · " + plat + " · " + cpu + " cores · " + mem);
+            log("              tz: " + tz, "#007a22");
+            break;
+        }
+
+        case "screen": {
+            const sw  = result.screen_width || "?";
+            const sh  = result.screen_height || "?";
+            const ww  = result.window_inner_width || "?";
+            const wh  = result.window_inner_height || "?";
+            const dpr = result.device_pixel_ratio || "?";
+            log("screen        " + sw + "×" + sh + " · window " + ww + "×" + wh + " · dpr " + dpr);
+            break;
+        }
+
+        case "webrtc": {
+            if (result.webrtc_blocked) {
+                log("webrtc        [BLOCKED]", "#004d18");
+                break;
+            }
+            const local  = (result.local_ips || []);
+            const pub    = result.public_ip_via_stun;
+            if (local.length > 0) {
+                log("webrtc        local: " + local.join(", "), "#ff8800");
+            } else {
+                log("webrtc        no local ip leak", "#007a22");
+            }
+            if (pub) {
+                log("              public: " + pub, "#007a22");
+            }
+            break;
+        }
+
+        case "webgl": {
+            if (result.webgl_blocked) {
+                log("webgl         [BLOCKED]", "#004d18");
+                break;
+            }
+            const renderer = result.renderer || result.vendor || "unknown";
+            const masked   = result.unmasked ? "[unmasked]" : "[masked]";
+            log("webgl         " + trunc(renderer, 40) + "  " + masked,
+                result.unmasked ? "#00cc33" : "#007a22");
+            if (result.precision_hash) {
+                log("              precision: " + trunc(result.precision_hash, 16), "#007a22");
+            }
+            break;
+        }
     }
 }
 
 async function run() {
-    log("initializing collectors...");
+    log("initializing collectors...", "#007a22");
     setStatus("[ SCANNING ]");
 
     try {
-        log("canvas fingerprint...");
-        log("audio fingerprint...");
-        log("font enumeration...");
-        log("navigator metadata...");
-        log("screen geometry...");
-        log("webrtc ip probe...");
-        log("webgl precision hash...");
+        const browser = await collectFingerprint(onProgress);
 
-        const browser = await collectFingerprint();
-
-        log("payload assembled — transmitting...", "#fa5");
-        setStatus("[ TRANSMITTING ]", "#fa5");
+        log("─────────────────────────────────", "#004d18");
+        log("payload assembled — transmitting...", "#00ff41");
+        setStatus("[ TRANSMITTING ]", "#00ff41");
 
         const response = await fetch("/api/fingerprint", {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ browser: browser }),
+            body:    JSON.stringify({ browser }),
         });
 
         if (!response.ok) {
-            log("server error: " + response.status, "#f55");
-            setStatus("[ ERROR ]", "#f55");
+            log("server error: " + response.status, "#ff3333");
+            setStatus("[ ERROR ]", "#ff3333");
             return;
         }
 
         const result = await response.json();
-        log("scan complete — redirecting...", "#5f5");
-        setStatus("[ COMPLETE ]", "#5f5");
+        log("analysis complete · score: " + result.composite_score + " [" + result.risk_level + "]",
+            result.risk_level === "CRITICAL" ? "#ff3333" :
+            result.risk_level === "HIGH"     ? "#ff8800" :
+            result.risk_level === "MEDIUM"   ? "#ffff00" : "#00ff41");
+        setStatus("[ COMPLETE ]", "#00ff41");
         window.location.href = "/results/" + result.scan_id;
 
     } catch (err) {
-        log("fatal: " + err.message, "#f55");
-        setStatus("[ ERROR ]", "#f55");
+        log("fatal: " + err.message, "#ff3333");
+        setStatus("[ ERROR ]", "#ff3333");
     }
 }
 
