@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Glint — Case History{% endblock %}
+
+{% block head %}
+<style>
+    body { align-items: flex-start; justify-content: flex-start; padding: 3rem 2rem; }
+
+    .page { width: 100%; max-width: 820px; margin: 0 auto; font-size: 0.78rem; }
+
+    .header {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #004d18;
+    }
+    .header-meta  { color: #004d18; font-size: 0.62rem; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+    .header-title { color: #00ff41; font-size: 0.72rem; letter-spacing: 0.3em; font-weight: bold; }
+
+    .section-head {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #004d18;
+    }
+    .section-num  { color: #004d18; font-size: 0.65rem; letter-spacing: 0.15em; }
+    .section-name { color: #00ff41; font-size: 0.72rem; letter-spacing: 0.25em; font-weight: bold; }
+    .section-count { color: #004d18; font-size: 0.65rem; margin-left: auto; letter-spacing: 0.1em; }
+    .section-rule { flex: 1; height: 1px; background: #004d18; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+        text-align: left;
+        color: #007a22;
+        font-size: 0.62rem;
+        letter-spacing: 0.2em;
+        padding: 0 1rem 0.7rem 0;
+        border-bottom: 1px solid #002a0d;
+        font-weight: normal;
+    }
+    td {
+        padding: 0.55rem 1rem 0.55rem 0;
+        border-bottom: 1px solid #001a08;
+        color: #00cc33;
+        font-size: 0.72rem;
+        vertical-align: middle;
+    }
+    tr:hover td { background: #020f04; }
+
+    .col-ref   { color: #004d18; font-size: 0.65rem; width: 2rem; }
+    .col-id    { font-size: 0.68rem; }
+    .col-id a  { color: #00cc33; letter-spacing: 0.03em; }
+    .col-id a:hover { color: #00ff41; opacity: 1; }
+    .col-date  { color: #007a22; font-size: 0.68rem; }
+    .col-ip    { color: #007a22; font-size: 0.68rem; }
+    .col-score { font-weight: bold; font-size: 0.9rem; }
+    .col-level { font-size: 0.65rem; letter-spacing: 0.15em; font-weight: bold; }
+
+    .risk-CRITICAL { color: #ff3333; }
+    .risk-HIGH     { color: #ff8800; }
+    .risk-MEDIUM   { color: #ffff00; }
+    .risk-LOW      { color: #00ff41; }
+
+    .empty { color: #004d18; font-size: 0.75rem; padding: 3rem 0; }
+    .error { color: #ff3333; font-size: 0.75rem; padding: 3rem 0; }
+
+    .nav-links {
+        margin-top: 2.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #004d18;
+        display: flex;
+        gap: 2rem;
+        font-size: 0.68rem;
+    }
+    .nav-links a { color: #007a22; }
+    .nav-links a:hover { color: #00cc33; opacity: 1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="header">
+        <div class="header-meta">ARCHIVE</div>
+        <div class="header-title">CASE HISTORY</div>
+    </div>
+
+    <div id="content"><p class="empty">RETRIEVING ARCHIVE...</p></div>
+
+    <div class="nav-links">
+        <a href="/">← NEW SCAN</a>
+    </div>
+</div>
+
+<script type="module">
+async function load() {
+    const container = document.getElementById("content");
+
+    const response = await fetch("/api/scans");
+    if (!response.ok) {
+        container.innerHTML = '<p class="error">FAILED TO RETRIEVE ARCHIVE</p>';
+        return;
+    }
+
+    const scans = await response.json();
+
+    if (scans.length === 0) {
+        container.innerHTML = '<p class="empty">NO CASES ON RECORD</p>';
+        return;
+    }
+
+    const rows = scans.map((s, i) => {
+        const ref   = String(i + 1).padStart(2, "0");
+        const date  = new Date(s.created_at).toISOString().replace("T", " ").slice(0, 19) + "Z";
+        const short = s.scan_id.slice(0, 8) + "…" + s.scan_id.slice(-4);
+        return `<tr>
+            <td class="col-ref">[${esc(ref)}]</td>
+            <td class="col-id"><a href="/results/${esc(s.scan_id)}" translate="no">${esc(short)}</a></td>
+            <td class="col-date">${esc(date)}</td>
+            <td class="col-ip">${esc(s.ip_address)}</td>
+            <td class="col-score risk-${esc(s.risk_level)}">${esc(s.composite_score.toFixed(2))}</td>
+            <td class="col-level risk-${esc(s.risk_level)}">${esc(s.risk_level)}</td>
+        </tr>`;
+    }).join("");
+
+    container.innerHTML = `
+<div class="section-head">
+    <span class="section-num">SECTION 01</span>
+    <span class="section-name">CASE LOG</span>
+    <span class="section-count">[${scans.length} RECORDS]</span>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th></th>
+            <th>CASE ID</th>
+            <th>ASSESSED</th>
+            <th>SUBJECT IP</th>
+            <th>INDEX</th>
+            <th>CLASS</th>
+        </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+</table>`;
+}
+
+function esc(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+load();
+</script>
+{% endblock %}

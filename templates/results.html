@@ -1,0 +1,726 @@
+{% extends "base.html" %}
+
+{% block title %}Glint — Results{% endblock %}
+
+{% block head %}
+<style>
+    body { align-items: flex-start; justify-content: flex-start; padding: 0; }
+
+    .layout {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    /* ── raw intel sidebar ── */
+    .raw-panel {
+        width: 300px;
+        flex-shrink: 0;
+        background: #000;
+        border-right: 1px solid #002a0d;
+        padding: 1.2rem 0.9rem;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        overflow-y: auto;
+        font-size: 0.63rem;
+        line-height: 1.5;
+        scrollbar-width: thin;
+        scrollbar-color: #002a0d #000;
+    }
+    .raw-panel-title {
+        color: #00ff41;
+        font-size: 0.6rem;
+        letter-spacing: 0.3em;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #002a0d;
+    }
+
+    /* accordion */
+    details { margin-bottom: 0.3rem; }
+    details + details { border-top: 1px solid #001a08; }
+
+    summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.35rem 0;
+        color: #007a22;
+        font-size: 0.6rem;
+        letter-spacing: 0.2em;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before {
+        content: "▶";
+        font-size: 0.5rem;
+        color: #004d18;
+        transition: transform 0.15s;
+        display: inline-block;
+    }
+    details[open] > summary::before { transform: rotate(90deg); }
+    summary:hover { color: #00cc33; }
+
+    .raw-badge {
+        margin-left: auto;
+        font-size: 0.55rem;
+        color: #004d18;
+        letter-spacing: 0;
+    }
+    .raw-badge.warn { color: #ff8800; }
+    .raw-badge.ok   { color: #007a22; }
+
+    .raw-body { padding: 0.3rem 0 0.6rem 0.9rem; }
+
+    .raw-line { color: #004d18; word-break: break-all; margin-bottom: 0.1rem; }
+    .raw-key  { color: #007a22; }
+    .raw-val  { color: #004d18; }
+    .raw-val-hi  { color: #00cc33; }
+    .raw-val-warn { color: #ff8800; }
+    .raw-val-dim  { color: #002a0d; }
+
+    .raw-hash {
+        color: #004d18;
+        word-break: break-all;
+        font-size: 0.58rem;
+        letter-spacing: 0.03em;
+    }
+    .raw-hash .raw-hash-hi { color: #007a22; }
+
+    .raw-divider {
+        border: none;
+        border-top: 1px solid #001a08;
+        margin: 0.4rem 0;
+    }
+
+    .tri-match    { color: #007a22; }
+    .tri-mismatch { color: #ff8800; }
+    .tri-unknown  { color: #004d18; }
+
+    /* ── main report ── */
+    .page {
+        flex: 1;
+        min-width: 0;
+        padding: 3rem 2rem;
+        font-size: 0.78rem;
+        line-height: 1.6;
+    }
+
+    /* ── case header ── */
+    .case-header { margin-bottom: 2.5rem; }
+    .case-meta {
+        color: #004d18;
+        font-size: 0.68rem;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.3rem;
+    }
+    .case-id {
+        color: #00cc33;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+    }
+    .threat-row {
+        display: flex;
+        align-items: baseline;
+        gap: 2rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #004d18;
+    }
+    .threat-label {
+        color: #004d18;
+        font-size: 0.62rem;
+        letter-spacing: 0.25em;
+    }
+    .threat-index {
+        color: #00ff41;
+        font-size: 2.4rem;
+        font-weight: bold;
+        line-height: 1;
+        text-shadow: 0 0 20px currentColor;
+    }
+    .threat-class {
+        font-size: 0.72rem;
+        letter-spacing: 0.3em;
+        font-weight: bold;
+    }
+
+    /* ── sections ── */
+    .section { margin-bottom: 2.5rem; }
+    .section-head {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #004d18;
+    }
+    .section-num  { color: #004d18; font-size: 0.65rem; letter-spacing: 0.15em; }
+    .section-name { color: #00ff41; font-size: 0.72rem; letter-spacing: 0.25em; font-weight: bold; }
+    .section-count { color: #004d18; font-size: 0.65rem; margin-left: auto; letter-spacing: 0.1em; }
+
+    /* ── dimensional table ── */
+    .dim-table { width: 100%; border-collapse: collapse; }
+    .dim-table td {
+        padding: 0.3rem 0;
+        vertical-align: middle;
+    }
+    .dim-table .col-name  { color: #00cc33; width: 140px; font-size: 0.72rem; letter-spacing: 0.05em; }
+    .dim-table .col-bar   { font-family: inherit; letter-spacing: 0; font-size: 0.72rem; padding: 0 1rem; }
+    .dim-table .col-score { color: #00ff41; width: 60px; text-align: right; font-size: 0.72rem; }
+    .dim-table .col-wt    { color: #004d18; width: 50px; text-align: right; font-size: 0.65rem; padding-left: 0.8rem; }
+    .entropy-line {
+        margin-top: 1rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid #002a0d;
+        color: #004d18;
+        font-size: 0.65rem;
+        letter-spacing: 0.2em;
+    }
+    .entropy-line span { color: #00cc33; }
+
+    /* ── findings ── */
+    .finding-entry { margin-bottom: 1.4rem; }
+    .finding-head {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        margin-bottom: 0.3rem;
+    }
+    .finding-ref      { color: #004d18; font-size: 0.65rem; width: 2.5rem; flex-shrink: 0; }
+    .finding-sev      { font-size: 0.65rem; font-weight: bold; letter-spacing: 0.12em; width: 70px; flex-shrink: 0; }
+    .finding-key      { color: #00ff41; font-size: 0.72rem; letter-spacing: 0.06em; }
+    .finding-title    { color: #00cc33; font-size: 0.72rem; margin-left: 3.5rem; }
+    .finding-desc     { color: #007a22; font-size: 0.7rem;  margin-left: 3.5rem; }
+    .finding-evidence {
+        color: #004d18;
+        font-size: 0.67rem;
+        margin-left: 3.5rem;
+        margin-top: 0.2rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    .finding-evidence::before { content: "EVIDENCE ─ "; color: #003a10; }
+
+    .sev-CRITICAL { color: #ff3333; }
+    .sev-HIGH     { color: #ff8800; }
+    .sev-MEDIUM   { color: #ffff00; }
+    .sev-LOW      { color: #00ff41; }
+    .sev-INFO     { color: #004d18; }
+
+    /* ── hardening ── */
+    .directive-entry { margin-bottom: 1.4rem; }
+    .directive-head {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        margin-bottom: 0.3rem;
+    }
+    .directive-ref   { color: #004d18; font-size: 0.65rem; width: 2.5rem; flex-shrink: 0; }
+    .directive-pri   { font-size: 0.65rem; font-weight: bold; letter-spacing: 0.12em; width: 70px; flex-shrink: 0; }
+    .directive-title { color: #00ff41; font-size: 0.72rem; }
+    .directive-step {
+        color: #00cc33;
+        font-size: 0.7rem;
+        margin-left: 3.5rem;
+        margin-top: 0.15rem;
+    }
+    .directive-step::before { content: "── "; color: #004d18; }
+    .directive-ref-link {
+        color: #004d18;
+        font-size: 0.65rem;
+        margin-left: 3.5rem;
+        margin-top: 0.3rem;
+        display: block;
+        letter-spacing: 0.05em;
+    }
+    .directive-ref-link::before { content: "REF ─ "; }
+    .directive-ref-link a { color: #004d18; }
+    .directive-ref-link a:hover { color: #007a22; opacity: 1; }
+
+    /* ── server intelligence ── */
+    .intel-row {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 0.2rem 1rem;
+        font-size: 0.7rem;
+        margin-bottom: 0.2rem;
+    }
+    .intel-key { color: #004d18; letter-spacing: 0.1em; }
+    .intel-val { color: #00cc33; word-break: break-all; }
+
+    /* ── states ── */
+    .loading { color: #004d18; font-size: 0.75rem; padding: 3rem; text-align: center; }
+    .error   { color: #ff3333; font-size: 0.75rem; padding: 3rem; text-align: center; }
+
+    /* ── nav ── */
+    .nav-links {
+        margin-top: 2.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #004d18;
+        display: flex;
+        gap: 2rem;
+        font-size: 0.68rem;
+        color: #004d18;
+    }
+    .nav-links a { color: #007a22; }
+    .nav-links a:hover { color: #00cc33; opacity: 1; }
+
+    /* ── reveal animation ── */
+    @keyframes reveal {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    .reveal { animation: reveal 0.4s ease both; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+    <div class="raw-panel" id="raw-panel">
+        <div class="raw-panel-title">RAW INTEL FEED</div>
+        <div id="raw-content" style="color:#002a0d;font-size:0.62rem;">AWAITING DATA...</div>
+    </div>
+    <div class="page">
+        <div id="loading" class="loading">RETRIEVING CASE FILE...</div>
+        <div id="app" style="display:none;"></div>
+    </div>
+</div>
+
+<script type="module">
+const SCAN_ID = {{ scan_id | tojson }};
+const BAR_WIDTH = 24;
+const WEIGHTS = { network: 35, anonymity: 30, data_exposure: 25, ip_reputation: 10 };
+const SEV_ORDER = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3, INFO: 4 };
+
+async function load() {
+    const loadingEl = document.getElementById("loading");
+    const appEl     = document.getElementById("app");
+
+    const response = await fetch("/api/scan/" + SCAN_ID);
+    if (!response.ok) {
+        loadingEl.className   = "error";
+        loadingEl.textContent = "CASE FILE NOT FOUND: " + SCAN_ID;
+        return;
+    }
+
+    const data = await response.json();
+    loadingEl.style.display = "none";
+    appEl.style.display     = "block";
+    appEl.innerHTML         = render(data);
+
+    renderRawPanel(data);
+    animateBars(data.dimensions);
+    animateScore(data.composite_score);
+}
+
+function renderRawPanel(data) {
+    const container = document.getElementById("raw-content");
+    if (!container) return;
+
+    const b   = (data.raw_payload || {}).browser || {};
+    const obs = data.server_observed || {};
+    const ip  = obs.ip_reputation || {};
+    const hdr = obs.header_analysis || {};
+    const nav = b.navigator || {};
+    const scr = b.screen    || {};
+    const wgl = b.webgl     || {};
+    const wrt = b.webrtc    || {};
+
+    function kv(k, v, cls) {
+        if (v === undefined || v === null || v === "") return "";
+        return `<div class="raw-line"><span class="raw-key">${esc(k)}</span>  <span class="${cls || "raw-val"}">${esc(String(v))}</span></div>`;
+    }
+
+    function hashLine(label, hash) {
+        if (!hash) return "";
+        const hi  = hash.slice(0, 8);
+        const dim = hash.slice(8);
+        return `<div class="raw-line"><span class="raw-key">${esc(label)}</span></div>
+<div class="raw-hash"><span class="raw-hash-hi">${esc(hi)}</span>${esc(dim)}</div>`;
+    }
+
+    function section(title, badge, badgeCls, open, body) {
+        const badgeHtml = badge
+            ? `<span class="raw-badge ${badgeCls || ""}">${esc(badge)}</span>`
+            : "";
+        return `<details${open ? " open" : ""}>
+<summary>${esc(title)}${badgeHtml}</summary>
+<div class="raw-body">${body}</div>
+</details>`;
+    }
+
+    // ── TRIANGULATION ──────────────────────────────────
+    const tzNav  = nav.timezone;
+    const tzIp   = ip.timezone;
+    const tzMatch = tzNav && tzIp
+        ? (tzNav === tzIp ? "MATCH" : "MISMATCH")
+        : "UNKNOWN";
+    const tzCls = tzMatch === "MATCH" ? "tri-match" : tzMatch === "MISMATCH" ? "tri-mismatch" : "tri-unknown";
+
+    const langNav = nav.language ? nav.language.split("-")[0].toLowerCase() : null;
+    const langHdr = hdr.lang_header ? hdr.lang_header.split("-")[0].toLowerCase() : null;
+    const langMatch = langNav && langHdr
+        ? (langNav === langHdr ? "MATCH" : "MISMATCH")
+        : "UNKNOWN";
+    const langCls = langMatch === "MATCH" ? "tri-match" : langMatch === "MISMATCH" ? "tri-mismatch" : "tri-unknown";
+
+    const stunIp   = wrt.public_ip_via_stun;
+    const serverIp = obs.remote_ip;
+    const ipMatch  = stunIp && serverIp
+        ? (stunIp === serverIp ? "MATCH" : "MISMATCH — VPN BYPASS")
+        : "UNKNOWN";
+    const ipCls = ipMatch === "MATCH" ? "tri-match" : ipMatch.startsWith("MISMATCH") ? "tri-mismatch" : "tri-unknown";
+
+    const triBody = `
+<div class="raw-line">timezone</div>
+<div class="raw-line">  nav  <span class="raw-val-hi">${esc(tzNav || "—")}</span></div>
+<div class="raw-line">  ip   <span class="raw-val-hi">${esc(tzIp  || "—")}</span></div>
+<div class="raw-line">  <span class="${tzCls}">${tzMatch}</span></div>
+<hr class="raw-divider">
+<div class="raw-line">language</div>
+<div class="raw-line">  header  <span class="raw-val-hi">${esc(hdr.lang_header || "—")}</span></div>
+<div class="raw-line">  nav     <span class="raw-val-hi">${esc(nav.language || "—")}</span></div>
+<div class="raw-line">  <span class="${langCls}">${langMatch}</span></div>
+<hr class="raw-divider">
+<div class="raw-line">public ip</div>
+<div class="raw-line">  stun    <span class="raw-val-hi">${esc(stunIp   || "—")}</span></div>
+<div class="raw-line">  server  <span class="raw-val-hi">${esc(serverIp || "—")}</span></div>
+<div class="raw-line">  <span class="${ipCls}">${ipMatch}</span></div>`;
+
+    const triWarnings = [tzMatch, langMatch, ipMatch].filter(m => m.includes("MISMATCH")).length;
+
+    // ── ENTROPY BREAKDOWN ──────────────────────────────
+    const entropyItems = [
+        ["canvas",      b.canvas_blocked    ? 0 : 20],
+        ["audio",       b.audio_blocked     ? 0 : 19],
+        ["webgl prec.", wgl.webgl_blocked   ? 0 : (wgl.unmasked ? 17 : 8)],
+        ["fonts",       b.fonts_blocked     ? 0 : Math.min(Math.round((b.font_count || 0) / 5), 15)],
+        ["navigator",   (nav.hardware_concurrency && nav.device_memory) ? 8 : 3],
+        ["screen",      4],
+    ];
+    const totalEntropy = entropyItems.reduce((s, [, v]) => s + v, 0);
+    const entropyBody  = entropyItems.map(([name, bits]) => {
+        const bar = "█".repeat(Math.round(bits / 2)) + "░".repeat(10 - Math.round(bits / 2));
+        return `<div class="raw-line"><span class="raw-key" style="display:inline-block;width:80px">${esc(name)}</span><span class="raw-val-dim">${bar}</span> <span class="raw-val-hi">${bits}</span></div>`;
+    }).join("") + `<hr class="raw-divider"><div class="raw-line">total  <span class="raw-val-hi">${totalEntropy} bits</span></div>`;
+
+    // ── CANVAS ─────────────────────────────────────────
+    const canvasBody = b.canvas_blocked
+        ? kv("status", "BLOCKED", "raw-val-warn")
+        : hashLine("sha256", b.canvas_hash) + kv("entropy", "~20 bits", "raw-val-dim");
+
+    // ── AUDIO ──────────────────────────────────────────
+    const audioBody = b.audio_blocked
+        ? kv("status", "BLOCKED", "raw-val-warn")
+        : hashLine("sha256", b.audio_hash) + kv("entropy", "~19 bits", "raw-val-dim");
+
+    // ── WEBGL ──────────────────────────────────────────
+    const params     = wgl.parameters || {};
+    const extensions = wgl.extensions || [];
+    const paramLines = Object.entries(params)
+        .map(([k, v]) => kv(k, Array.isArray(v) ? v.join(", ") : v)).join("");
+    const extLines   = extensions.map(e => `<div class="raw-line raw-val-dim">${esc(e)}</div>`).join("");
+    const webglBody  = wgl.webgl_blocked
+        ? kv("status", "BLOCKED", "raw-val-warn")
+        : kv("vendor",       wgl.vendor)
+        + kv("renderer",     wgl.renderer)
+        + kv("version",      wgl.version)
+        + kv("shading_lang", wgl.shading_lang)
+        + kv("unmasked",     wgl.unmasked, wgl.unmasked ? "raw-val-warn" : "raw-val")
+        + `<hr class="raw-divider">`
+        + hashLine("precision_hash", wgl.precision_hash)
+        + `<hr class="raw-divider">`
+        + paramLines
+        + (extensions.length ? `<hr class="raw-divider"><div class="raw-line raw-val-dim">extensions [${extensions.length}]</div>${extLines}` : "");
+
+    // ── NAVIGATOR ──────────────────────────────────────
+    const langs = (nav.languages || []).join(", ");
+    const navBody = kv("language",    nav.language)
+        + kv("languages",   langs)
+        + kv("platform",    nav.platform)
+        + kv("concurrency", nav.hardware_concurrency)
+        + kv("memory",      nav.device_memory ? nav.device_memory + " GB" : null)
+        + kv("timezone",    nav.timezone)
+        + kv("touch",       nav.max_touch_points)
+        + kv("connection",  nav.connection_type)
+        + kv("plugins",     nav.plugin_count)
+        + `<hr class="raw-divider">`
+        + `<div class="raw-line raw-val-dim" style="word-break:break-all">${esc(nav.user_agent || "")}</div>`;
+
+    // ── SCREEN ─────────────────────────────────────────
+    const scrBody = kv("resolution", scr.screen_width + "×" + scr.screen_height)
+        + kv("window",     scr.window_inner_width + "×" + scr.window_inner_height)
+        + kv("color_depth", scr.color_depth)
+        + kv("dpr",         scr.device_pixel_ratio)
+        + kv("orientation", scr.orientation);
+
+    // ── WEBRTC ─────────────────────────────────────────
+    const localIps = wrt.local_ips || [];
+    const ipLines  = localIps.map(entry => {
+        const obj = typeof entry === "object" ? entry : { ip: entry, type: "?" };
+        return `<div class="raw-line">  <span class="raw-val-warn">${esc(obj.ip)}</span> <span class="raw-val-dim">${esc(obj.type || "")}</span></div>`;
+    }).join("");
+    const mdnsHostnames = (wrt.mdns_hostnames || []);
+    const webrtcBody = wrt.webrtc_blocked
+        ? kv("status", "BLOCKED", "raw-val")
+        : (localIps.length
+            ? `<div class="raw-line"><span class="raw-key">local_ips</span> <span class="raw-val-warn">[LEAK]</span></div>${ipLines}`
+            : kv("local_ips", "none", "raw-val"))
+        + kv("public_stun",    wrt.public_ip_via_stun)
+        + kv("mdns_protected", wrt.mdns_protected)
+        + (mdnsHostnames.length ? `<div class="raw-line raw-val-dim">${esc(mdnsHostnames.join(", "))}</div>` : "");
+
+    // ── FONTS ──────────────────────────────────────────
+    const fonts     = b.fonts || [];
+    const fontLines = fonts.map(f => `<div class="raw-line raw-val-dim">${esc(f)}</div>`).join("");
+    const fontsBody = kv("count",   b.font_count)
+        + kv("blocked", b.fonts_blocked)
+        + `<hr class="raw-divider">${fontLines}`;
+
+    // ── IP REPUTATION ──────────────────────────────────
+    const ipRepBody = kv("ip",       obs.remote_ip)
+        + kv("country",  ip.country)
+        + kv("isp",      ip.isp)
+        + kv("org",      ip.org)
+        + kv("timezone", ip.timezone)
+        + kv("is_proxy",   ip.is_proxy,   ip.is_proxy   ? "raw-val-warn" : "raw-val")
+        + kv("is_hosting", ip.is_hosting, ip.is_hosting ? "raw-val-warn" : "raw-val");
+
+    // ── HEADERS ────────────────────────────────────────
+    const hdrBody = kv("accept_language", hdr.accept_language)
+        + kv("lang_header",    hdr.lang_header)
+        + kv("lang_navigator", hdr.lang_navigator)
+        + kv("mismatch",       hdr.lang_mismatch, hdr.lang_mismatch ? "raw-val-warn" : "raw-val")
+        + `<hr class="raw-divider">`
+        + `<div class="raw-line raw-val-dim" style="word-break:break-all">${esc(obs.user_agent || "")}</div>`;
+
+    container.innerHTML =
+        section("TRIANGULATION", triWarnings > 0 ? triWarnings + " SIGNAL" + (triWarnings > 1 ? "S" : "") : "CLEAN",
+                triWarnings > 0 ? "warn" : "ok", true, triBody)
+      + section("ENTROPY",     totalEntropy + " bits", "", false, entropyBody)
+      + section("CANVAS",      b.canvas_blocked    ? "BLOCKED" : "OK", b.canvas_blocked ? "warn" : "ok", false, canvasBody)
+      + section("AUDIO",       b.audio_blocked     ? "BLOCKED" : "OK", b.audio_blocked  ? "warn" : "ok", false, audioBody)
+      + section("WEBGL",       wgl.unmasked ? "UNMASKED" : wgl.webgl_blocked ? "BLOCKED" : "MASKED",
+                wgl.unmasked ? "warn" : "", false, webglBody)
+      + section("NAVIGATOR",   "", "", false, navBody)
+      + section("SCREEN",      "", "", false, scrBody)
+      + section("WEBRTC",      localIps.length > 0 ? "LEAK" : wrt.webrtc_blocked ? "BLOCKED" : "CLEAN",
+                localIps.length > 0 ? "warn" : "ok", false, webrtcBody)
+      + section("FONTS",       (b.font_count || 0) + " detected", "", false, fontsBody)
+      + section("IP REPUTATION", ip.is_proxy ? "PROXY" : "", ip.is_proxy ? "warn" : "", false, ipRepBody)
+      + section("HEADERS",     hdr.lang_mismatch ? "MISMATCH" : "", hdr.lang_mismatch ? "warn" : "", false, hdrBody);
+}
+
+function scoreColor(s) {
+    if (s >= 76) return "#ff3333";
+    if (s >= 51) return "#ff8800";
+    if (s >= 26) return "#ffff00";
+    return "#00ff41";
+}
+
+function asciiBar(score) {
+    const filled = Math.round((score / 100) * BAR_WIDTH);
+    return "█".repeat(filled) + "░".repeat(BAR_WIDTH - filled);
+}
+
+function pad(str, len) {
+    return String(str).padEnd(len, " ");
+}
+
+function esc(s) {
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function renderSection(num, name, count, content) {
+    const countStr = count !== null ? `[${count} DETECTED]` : "";
+    return `
+<div class="section reveal" style="animation-delay:${num * 120}ms">
+    <div class="section-head">
+        <span class="section-num">SECTION ${String(num).padStart(2,"0")}</span>
+        <span class="section-name">${name}</span>
+        ${countStr ? `<span class="section-count">${countStr}</span>` : ""}
+    </div>
+    ${content}
+</div>`;
+}
+
+function renderDimensions(data) {
+    const dimMap = {};
+    for (const d of data.dimensions) dimMap[d.name] = d.score;
+
+    const order = ["network","anonymity","data_exposure","ip_reputation"];
+    const labels = { network: "NETWORK", anonymity: "ANONYMITY",
+                     data_exposure: "DATA EXPOSURE", ip_reputation: "IP REPUTATION" };
+
+    const rows = order.map(name => {
+        const score = dimMap[name] ?? 0;
+        const color = scoreColor(score);
+        const wt    = WEIGHTS[name];
+        return `<tr>
+            <td class="col-name">${labels[name]}</td>
+            <td class="col-bar" style="color:${color}" data-score="${score}" data-color="${color}">${asciiBar(0)}</td>
+            <td class="col-score" style="color:${color}">${score}</td>
+            <td class="col-wt">WT ${wt}%</td>
+        </tr>`;
+    }).join("");
+
+    return `
+<table class="dim-table">${rows}</table>
+<div class="entropy-line">
+    IDENTITY ENTROPY ──────────────── <span>${data.identity_entropy_score.toFixed(1)} BITS</span>
+</div>`;
+}
+
+function renderFindings(findings) {
+    if (!findings || findings.length === 0) {
+        return '<div style="color:#004d18;font-size:0.7rem;">NO FINDINGS RECORDED</div>';
+    }
+    const sorted = [...findings].sort(
+        (a, b) => (SEV_ORDER[a.severity] ?? 99) - (SEV_ORDER[b.severity] ?? 99)
+    );
+    return sorted.map((f, i) => {
+        const ref = `[${String(i + 1).padStart(2,"0")}]`;
+        const evidenceStr = f.evidence && Object.keys(f.evidence).length > 0
+            ? esc(JSON.stringify(f.evidence))
+            : "";
+        return `
+<div class="finding-entry reveal" style="animation-delay:${(i + 2) * 80}ms">
+    <div class="finding-head">
+        <span class="finding-ref">${ref}</span>
+        <span class="finding-sev sev-${f.severity}">${f.severity}</span>
+        <span class="finding-key" translate="no">${esc(f.finding_key)}</span>
+    </div>
+    <div class="finding-title">${esc(f.title)}</div>
+    <div class="finding-desc">${esc(f.description)}</div>
+    ${evidenceStr ? `<div class="finding-evidence">${evidenceStr}</div>` : ""}
+</div>`;
+    }).join("");
+}
+
+function renderHardening(recs) {
+    if (!recs || recs.length === 0) {
+        return '<div style="color:#004d18;font-size:0.7rem;">NO DIRECTIVES ISSUED</div>';
+    }
+    return recs.map((r, i) => {
+        const ref   = `[${String(i + 1).padStart(2,"0")}]`;
+        const steps = r.steps.map(s => `<div class="directive-step">${esc(s)}</div>`).join("");
+        const refs  = (r.references || []).map(
+            u => `<span class="directive-ref-link"><a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a></span>`
+        ).join("");
+        return `
+<div class="directive-entry reveal" style="animation-delay:${(i + 2) * 80}ms">
+    <div class="directive-head">
+        <span class="directive-ref">${ref}</span>
+        <span class="directive-pri sev-${r.priority}">${r.priority}</span>
+        <span class="directive-title">${esc(r.title)}</span>
+    </div>
+    ${steps}${refs}
+</div>`;
+    }).join("");
+}
+
+function renderIntel(obs) {
+    if (!obs) return "";
+    const ip  = obs.ip_reputation || {};
+    const hdr = obs.header_analysis || {};
+    const rows = [
+        ["REMOTE_IP",    obs.remote_ip],
+        ["USER_AGENT",   obs.user_agent],
+        ["COUNTRY",      ip.country],
+        ["ISP",          ip.isp],
+        ["TIMEZONE",     ip.timezone],
+        ["IS_PROXY",     ip.is_proxy],
+        ["IS_HOSTING",   ip.is_hosting],
+        ["ACCEPT_LANG",  hdr.accept_language],
+        ["LANG_MATCH",   hdr.lang_mismatch ? "MISMATCH" : "OK"],
+    ].filter(([, v]) => v !== undefined && v !== null && v !== "");
+
+    return rows.map(([k, v]) => `
+<div class="intel-row">
+    <span class="intel-key">${k}</span>
+    <span class="intel-val">${esc(String(v))}</span>
+</div>`).join("");
+}
+
+function render(data) {
+    const color     = scoreColor(data.composite_score);
+    const ts        = new Date().toISOString().replace("T", " ").slice(0, 19) + "Z";
+    const obs       = data.server_observed || {};
+    const findCount = (data.findings || []).filter(f => f.severity !== "INFO").length;
+    const recCount  = (data.recommendations || []).length;
+
+    return `
+<div class="case-header reveal">
+    <div class="case-meta">CASE FILE</div>
+    <div class="case-id" translate="no">${data.scan_id}</div>
+    <div class="case-meta" style="margin-top:0.2rem;">ASSESSED ${ts} · SUBJECT ${esc(obs.remote_ip || "UNKNOWN")}</div>
+    <div class="threat-row">
+        <div>
+            <div class="threat-label">THREAT INDEX</div>
+            <div class="threat-index" style="color:${color}" id="threat-score">0.0</div>
+        </div>
+        <div>
+            <div class="threat-label">CLASSIFICATION</div>
+            <div class="threat-class" style="color:${color}">${data.risk_level}</div>
+        </div>
+    </div>
+</div>
+
+${renderSection(1, "DIMENSIONAL ANALYSIS", null, renderDimensions(data))}
+${renderSection(2, "FINDINGS", findCount, renderFindings(data.findings || []))}
+${renderSection(3, "HARDENING DIRECTIVES", recCount, renderHardening(data.recommendations || []))}
+${renderSection(4, "SERVER INTELLIGENCE", null, renderIntel(obs))}
+
+<div class="nav-links">
+    <a href="/">← NEW SCAN</a>
+    <a href="/history">CASE HISTORY</a>
+</div>`;
+}
+
+function animateBars(dimensions) {
+    const cells = document.querySelectorAll(".col-bar[data-score]");
+    cells.forEach((cell, i) => {
+        const target = parseFloat(cell.dataset.score);
+        const color  = cell.dataset.color;
+        const filled = Math.round((target / 100) * BAR_WIDTH);
+        let current  = 0;
+        setTimeout(() => {
+            const iv = setInterval(() => {
+                current++;
+                cell.textContent = "█".repeat(current) + "░".repeat(BAR_WIDTH - current);
+                if (current >= filled) {
+                    clearInterval(iv);
+                    cell.textContent = asciiBar(target);
+                }
+            }, 28);
+        }, i * 120);
+    });
+}
+
+function animateScore(target) {
+    const el = document.getElementById("threat-score");
+    if (!el) return;
+    const duration = 1000;
+    const start    = performance.now();
+    function step(now) {
+        const t     = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = (eased * target).toFixed(1);
+        if (t < 1) requestAnimationFrame(step);
+        else el.textContent = target.toFixed(2);
+    }
+    requestAnimationFrame(step);
+}
+
+load();
+</script>
+{% endblock %}
