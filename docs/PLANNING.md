@@ -99,10 +99,10 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 
 | ID   | Story | Acceptance Criteria |
 |------|-------|---------------------|
-| HU29 | As a user, the SQLite database is created automatically on first run | `create_tables()` runs on startup without errors |
+| HU29 [done] | As a user, the SQLite database is created automatically on first run | `create_tables()` runs on startup without errors |
 | HU30 | As a user, each scan is persisted with the full payload | `scans` table contains raw_payload and result_json |
-| HU31 | As a user, I can install with `pip install -e .` | pyproject.toml is valid and dependencies resolve |
-| HU32 | As a user, I can run with `python -m acheron` | Entry point works from any directory |
+| HU31 [done] | As a user, I can install with `pip install -e .` | pyproject.toml is valid and dependencies resolve |
+| HU32 [done] | As a user, I can run with `python -m glint` | Entry point works from any directory |
 | HU33 | As a user, I configure API keys via `.env` file | `HIBP_API_KEY` and `ABUSEIPDB_API_KEY` loaded via python-dotenv |
 
 ---
