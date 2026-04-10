@@ -1,5 +1,6 @@
 import uuid
 import json
+import sqlite3
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
 
@@ -50,7 +51,6 @@ def receive():
 
     cfg = current_app.config["GLINT_CONFIG"]
 
-    import sqlite3
     with sqlite3.connect(cfg.DATABASE_PATH) as conn:
         conn.execute(
             """INSERT INTO scans
