@@ -39,9 +39,9 @@ def receive():
     user_agent = request.headers.get("User-Agent", "unknown")
     created_at = datetime.now(timezone.utc).isoformat()
 
-    result = run_risk(scan_id, payload, remote_ip, request)
+    cfg    = current_app.config["GLINT_CONFIG"]
+    result = run_risk(scan_id, payload, remote_ip, request, cfg.CLEAN_RESOLVERS)
 
-    cfg  = current_app.config["GLINT_CONFIG"]
     repo = ScanRepository(cfg.DATABASE_PATH)
     repo.save(
         scan_id=scan_id,

@@ -2,6 +2,7 @@ import uuid
 from dataclasses import dataclass, field
 from glint.collectors.http_headers import HeaderAnalysis
 from glint.collectors.ip_reputation import IPReputation
+from glint.collectors.dns_leak import DNSLeakResult
 
 
 @dataclass
@@ -80,7 +81,8 @@ def score_anonymity(browser: dict) -> DimensionScore:
 
 
 def score_network(browser: dict, headers: HeaderAnalysis,
-                  remote_ip: str, ip_rep: "IPReputation") -> DimensionScore:
+                  remote_ip: str, ip_rep: IPReputation,
+                  dns_leak: DNSLeakResult) -> DimensionScore:
     score = 0.0
     findings = []
 
@@ -130,6 +132,20 @@ def score_network(browser: dict, headers: HeaderAnalysis,
             "JavaScript timezone does not match IP geolocation timezone.",
             "network",
             {"js_timezone": nav_tz, "ip_timezone": ip_tz},
+        ))
+
+    if dns_leak.available and dns_leak.leaked:
+        leaked_isps = [r.isp for r in dns_leak.resolvers if not r.is_clean and r.isp]
+        score += 30.0
+        findings.append(_finding(
+            "DNS_LEAK", "HIGH",
+            "DNS resolver belongs to ISP",
+            "Your DNS queries are handled by your ISP, not a private resolver.",
+            "network",
+            {
+                "resolvers": [{"ip": r.ip, "isp": r.isp} for r in dns_leak.resolvers if not r.is_clean],
+                "isps": leaked_isps,
+            },
         ))
 
     score = min(score, 100.0)

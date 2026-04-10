@@ -23,7 +23,9 @@ def create_app(config: Config | None = None) -> Flask:
         create_tables(conn)
 
     from .api.fingerprint import bp as fingerprint_bp
+    from .api.osint import bp as osint_bp
     app.register_blueprint(fingerprint_bp)
+    app.register_blueprint(osint_bp)
 
     @app.route("/")
     def index():

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from glint.collectors.http_headers import HeaderAnalysis, analyze as analyze_headers
 from glint.collectors.ip_reputation import IPReputation, collect as collect_ip
+from glint.collectors.dns_leak import collect as collect_dns
 from glint.engine import dimensions
 from glint.engine import entropy
 from glint.engine.dimensions import Finding, DimensionScore
@@ -65,15 +66,17 @@ def _finding_to_dict(f: Finding) -> dict:
     }
 
 
-def run(scan_id: str, payload: dict, remote_ip: str, request) -> ScanResult:
+def run(scan_id: str, payload: dict, remote_ip: str, request,
+        clean_resolvers: list[str] | None = None) -> ScanResult:
     browser = payload.get("browser", {})
 
-    headers    = analyze_headers(request, browser)
-    ip_rep     = collect_ip(remote_ip)
+    headers       = analyze_headers(request, browser)
+    ip_rep        = collect_ip(remote_ip)
+    dns_result    = collect_dns(clean_resolvers or [])
     entropy_score = entropy.calculate(browser)
 
     dim_anonymity     = dimensions.score_anonymity(browser)
-    dim_network       = dimensions.score_network(browser, headers, remote_ip, ip_rep)
+    dim_network       = dimensions.score_network(browser, headers, remote_ip, ip_rep, dns_result)
     dim_data_exposure = dimensions.score_data_exposure(browser)
     dim_ip_reputation = dimensions.score_ip_reputation(ip_rep)
 
