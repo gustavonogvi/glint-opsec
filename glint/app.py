@@ -28,7 +28,8 @@ def create_app(config: Config | None = None) -> Flask:
 
     @app.route("/")
     def index():
-        return "Glint is running."
+        from flask import render_template
+        return render_template("index.html")
 
     return app
 
