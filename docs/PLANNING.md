@@ -110,48 +110,50 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 ## Phase Roadmap
 
 ```
-Phase 0 — Scaffolding
+Phase 0 — Scaffolding                              [done]
 ├── pyproject.toml ✓
 ├── .env.example ✓
 ├── .gitignore ✓
-├── acheron/app.py         Flask factory + main()
-├── acheron/config.py
-└── acheron/db/migrations.py
+├── glint/app.py ✓
+├── glint/config.py ✓
+├── glint/__main__.py ✓
+└── glint/db/migrations.py ✓
 
-Phase 1 — JS Collectors                            [Epic 1]
-├── static/js/collectors/canvas.js
-├── static/js/collectors/audio.js
-├── static/js/collectors/fonts.js
-├── static/js/collectors/navigator.js
-├── static/js/collectors/screen.js
-├── static/js/collectors/webrtc.js
-├── static/js/core/fingerprint.js
-├── static/js/core/submit.js
-└── templates/index.html
+Phase 1 — JS Collectors                            [done]
+├── static/js/collectors/canvas.js ✓
+├── static/js/collectors/audio.js ✓
+├── static/js/collectors/fonts.js ✓
+├── static/js/collectors/navigator.js ✓
+├── static/js/collectors/screen.js ✓
+├── static/js/collectors/webrtc.js ✓
+├── static/js/collectors/webgl.js ✓
+├── static/js/core/fingerprint.js ✓
+├── static/js/core/submit.js ✓
+└── templates/index.html ✓
 
-Phase 2 — Backend + Risk Engine                    [Epic 2 partial + Epic 4]
-├── acheron/api/fingerprint.py
-├── acheron/collectors/http_headers.py
-├── acheron/collectors/ip_reputation.py
-├── acheron/engine/entropy.py
-├── acheron/engine/dimensions.py
-├── acheron/engine/risk.py
-└── acheron/db/repository.py
+Phase 2 — Backend + Risk Engine                    [done]
+├── glint/api/fingerprint.py ✓
+├── glint/collectors/http_headers.py ✓
+├── glint/collectors/ip_reputation.py ✓
+├── glint/engine/entropy.py ✓
+├── glint/engine/dimensions.py ✓
+├── glint/engine/risk.py ✓
+└── glint/db/repository.py ✓
 
-Phase 3 — DNS Leak + HIBP                          [Epic 2 complete + Epic 3]
-├── acheron/collectors/dns_leak.py
-├── acheron/collectors/hibp.py
-└── acheron/api/osint.py
+Phase 3 — DNS Leak + HIBP                          [done]
+├── glint/collectors/dns_leak.py ✓
+├── glint/collectors/hibp.py ✓
+└── glint/api/osint.py ✓
 
-Phase 4 — Dashboard                                 [Epic 5]
+Phase 4 — Dashboard                                [pending]
 ├── templates/results.html
 ├── templates/history.html
 ├── static/js/dashboard/radar.js
 ├── static/js/dashboard/findings.js
-├── acheron/engine/hardening.py
-└── acheron/api/scan.py
+├── glint/engine/hardening.py
+└── glint/api/scan.py
 
-Phase 5 — Polish                                    [Epic 6]
+Phase 5 — Polish                                   [pending]
 ├── static/css/dashboard.css
 └── End-to-end validation
 ```
