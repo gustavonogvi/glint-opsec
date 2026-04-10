@@ -1,4 +1,9 @@
-# Glint
+```
+  ___  _     _       _
+ / __|| |   (_) _ _ | |_
+| (_ || |__ | || ' \|  _|
+ \___||____||_||_||_|\__|
+```
 
 Local OPSEC auditing tool. Measures how unique and traceable your browser fingerprint is.
 
