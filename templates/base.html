@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +7,8 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #0d0d0d;
-            color: #c0c0c0;
+            background: #050505;
+            color: #00ff41;
             font-family: "Cascadia Code", "Fira Code", "Courier New", monospace;
             min-height: 100vh;
             display: flex;
@@ -16,8 +16,22 @@
             align-items: center;
             justify-content: center;
         }
-        a { color: #5af; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.04) 2px,
+                rgba(0,0,0,0.04) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+        a { color: #00ff41; text-decoration: none; opacity: 0.6; }
+        a:hover { opacity: 1; }
     </style>
     {% block head %}{% endblock %}
 </head>
