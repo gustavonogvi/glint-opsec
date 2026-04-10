@@ -13,7 +13,9 @@ def get_scan(scan_id: str):
     if scan is None:
         return jsonify({"error": "scan not found"}), 404
 
-    return jsonify(scan.result_json), 200
+    payload = dict(scan.result_json)
+    payload["raw_payload"] = scan.raw_payload
+    return jsonify(payload), 200
 
 
 @bp.route("/scans", methods=["GET"])
