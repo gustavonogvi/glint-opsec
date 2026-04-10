@@ -3,6 +3,8 @@ import json
 import sqlite3
 from datetime import datetime, timezone
 from flask import Blueprint, request, jsonify, current_app
+from glint.engine.risk import run as run_risk
+from glint.db.repository import ScanRepository
 
 bp = Blueprint("fingerprint", __name__, url_prefix="/api")
 
@@ -32,40 +34,24 @@ def receive():
     if error:
         return jsonify({"error": error}), 400
 
-    scan_id   = str(uuid.uuid4())
-    remote_ip = _remote_ip()
+    scan_id    = str(uuid.uuid4())
+    remote_ip  = _remote_ip()
     user_agent = request.headers.get("User-Agent", "unknown")
     created_at = datetime.now(timezone.utc).isoformat()
 
-    result = {
-        "scan_id":         scan_id,
-        "composite_score": 0.0,
-        "risk_level":      "LOW",
-        "dimensions":      [],
-        "recommendations": [],
-        "server_observed": {
-            "remote_ip":     remote_ip,
-            "user_agent":    user_agent,
-        },
-    }
+    result = run_risk(scan_id, payload, remote_ip, request)
 
-    cfg = current_app.config["GLINT_CONFIG"]
+    cfg  = current_app.config["GLINT_CONFIG"]
+    repo = ScanRepository(cfg.DATABASE_PATH)
+    repo.save(
+        scan_id=scan_id,
+        created_at=created_at,
+        ip_address=remote_ip,
+        user_agent=user_agent,
+        composite_score=result.composite_score,
+        risk_level=result.risk_level,
+        raw_payload=payload,
+        result=result.to_dict(),
+    )
 
-    with sqlite3.connect(cfg.DATABASE_PATH) as conn:
-        conn.execute(
-            """INSERT INTO scans
-               (id, created_at, ip_address, user_agent, composite_score, risk_level, raw_payload, result_json)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                scan_id,
-                created_at,
-                remote_ip,
-                user_agent,
-                result["composite_score"],
-                result["risk_level"],
-                json.dumps(payload),
-                json.dumps(result),
-            ),
-        )
-
-    return jsonify(result), 200
+    return jsonify(result.to_dict()), 200

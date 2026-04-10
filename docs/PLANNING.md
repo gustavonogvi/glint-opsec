@@ -39,10 +39,10 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 
 | ID   | Story | Acceptance Criteria |
 |------|-------|---------------------|
-| HU9  | As a user, I know if my real IP leaks via WebRTC even with a VPN | Finding `WEBRTC_LEAK` with severity CRITICAL when private IP is exposed |
-| HU10 | As a user, I know if my DNS resolver belongs to my ISP (DNS leak) | Finding `DNS_LEAK` with severity HIGH when resolver is not a known clean one |
-| HU11 | As a system, the backend analyzes inconsistencies in HTTP headers | Finding `HEADER_LANG_MISMATCH` when Accept-Language differs from navigator.language |
-| HU12 | As a system, the backend detects timezone inconsistency | Finding `TIMEZONE_MISMATCH` when JS offset doesn't match geolocation-inferred timezone |
+| HU9 [done]  | As a user, I know if my real IP leaks via WebRTC even with a VPN | Finding `WEBRTC_LEAK` with severity CRITICAL when private IP is exposed |
+| HU10 [pending] | As a user, I know if my DNS resolver belongs to my ISP (DNS leak) | Finding `DNS_LEAK` with severity HIGH when resolver is not a known clean one |
+| HU11 [done] | As a system, the backend analyzes inconsistencies in HTTP headers | Finding `HEADER_LANG_MISMATCH` when Accept-Language differs from navigator.language |
+| HU12 [done] | As a system, the backend detects timezone inconsistency | Finding `TIMEZONE_MISMATCH` when JS offset doesn't match geolocation-inferred timezone |
 
 ---
 
@@ -55,9 +55,9 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 |------|-------|---------------------|
 | HU13 | As a user, I can check if my email was exposed in breaches (opt-in) | POST /api/osint returns breach list from HIBP |
 | HU14 | As a user, the email check uses k-anonymity (full email is never sent) | Only the first 5 chars of the SHA-1 hash are sent to HIBP |
-| HU15 | As a system, the user's IP is queried on ip-api.com | `server_observed.ip_reputation` contains country, ISP, proxy flag |
+| HU15 [done] | As a system, the user's IP is queried on ip-api.com | `server_observed.ip_reputation` contains country, ISP, proxy flag |
 | HU16 | As a system, IPs with high AbuseIPDB score generate a finding | Finding `IP_ABUSE_HIGH` when confidence > 50 (if API Key is configured) |
-| HU17 | As a system, an external API failure does not break the scan | Dimension score = 0 (neutral), INFO finding explaining unavailability |
+| HU17 [done] | As a system, an external API failure does not break the scan | Dimension score = 0 (neutral), INFO finding explaining unavailability |
 
 ---
 
@@ -68,12 +68,12 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 
 | ID   | Story | Acceptance Criteria |
 |------|-------|---------------------|
-| HU18 | As a system, each dimension produces a score from 0 to 100 | `dimensions[].score` always between 0 and 100 |
-| HU19 | As a system, the composite score is calculated with configurable weights | `composite_score = Σ(score × weight)` using weights from config |
-| HU20 | As a system, the composite score maps to a risk level | CRITICAL/HIGH/MEDIUM/LOW per defined thresholds |
-| HU21 | As a system, findings are generated with severity and evidence | Each finding has: `finding_key`, `severity`, `title`, `description`, `evidence{}` |
-| HU22 | As a system, the uniqueness score (entropy) is calculated separately | `identity_entropy_score` in bits, displayed separately from risk level |
-| HU23 | As a user, I receive a personalized hardening guide | Recommendations list ordered by priority, specific to my findings |
+| HU18 [done] | As a system, each dimension produces a score from 0 to 100 | `dimensions[].score` always between 0 and 100 |
+| HU19 [done] | As a system, the composite score is calculated with configurable weights | `composite_score = Σ(score × weight)` using weights from config |
+| HU20 [done] | As a system, the composite score maps to a risk level | CRITICAL/HIGH/MEDIUM/LOW per defined thresholds |
+| HU21 [done] | As a system, findings are generated with severity and evidence | Each finding has: `finding_key`, `severity`, `title`, `description`, `evidence{}` |
+| HU22 [done] | As a system, the uniqueness score (entropy) is calculated separately | `identity_entropy_score` in bits, displayed separately from risk level |
+| HU23 [pending] | As a user, I receive a personalized hardening guide | Recommendations list ordered by priority, specific to my findings |
 
 ---
 
