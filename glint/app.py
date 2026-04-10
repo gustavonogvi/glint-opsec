@@ -34,14 +34,60 @@ def create_app(config: Config | None = None) -> Flask:
         from flask import render_template
         return render_template("index.html")
 
+    @app.route("/results/<scan_id>")
+    def results(scan_id: str):
+        from flask import render_template
+        return render_template("results.html", scan_id=scan_id)
+
+    @app.route("/history")
+    def history():
+        from flask import render_template
+        return render_template("history.html")
+
     return app
+
+
+def _free_port(port: int) -> None:
+    import os
+    import socket
+    import subprocess
+    import sys
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        if s.connect_ex(("127.0.0.1", port)) != 0:
+            return
+
+    if sys.platform == "win32":
+        result = subprocess.run(
+            ["netstat", "-ano"], capture_output=True, text=True
+        )
+        for line in result.stdout.splitlines():
+            if f":{port} " in line and "LISTENING" in line:
+                parts = line.split()
+                pid = parts[-1]
+                if pid.isdigit() and int(pid) != os.getpid():
+                    subprocess.run(
+                        ["taskkill", "/F", "/PID", pid], capture_output=True
+                    )
+                    print(f" * killed existing process on :{port} (PID {pid})")
+    else:
+        result = subprocess.run(
+            ["lsof", "-ti", f":{port}"], capture_output=True, text=True
+        )
+        for pid_str in result.stdout.strip().splitlines():
+            if pid_str.isdigit() and int(pid_str) != os.getpid():
+                os.kill(int(pid_str), 9)
+                print(f" * killed existing process on :{port} (PID {pid_str})")
 
 
 def main() -> None:
     import os
-    app = create_app()
+    port  = int(os.getenv("PORT", 5000))
     debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug, host="127.0.0.1", port=5000)
+    _free_port(port)
+    app = create_app()
+    app.run(debug=debug, host="127.0.0.1", port=port)
 
 
 if __name__ == "__main__":
