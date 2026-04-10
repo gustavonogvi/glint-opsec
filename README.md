@@ -5,24 +5,11 @@
  \___||____||_||_||_|\__|
 ```
 
-Local OPSEC auditing tool. Measures how unique and traceable your browser fingerprint is.
+> *The more unique your trail, the easier you are to hunt.*
 
-Runs entirely on your machine — no data sent anywhere except optional external API calls (HIBP, ip-api.com).
+Local OPSEC auditing tool. Runs in your browser, scores your digital footprint across 4 risk dimensions, and tells you what to fix.
 
----
-
-## How it works
-
-Open it in your browser. It collects what any website could collect about you:
-
-- Canvas and audio fingerprints
-- Installed fonts (grouped by software: Office, Adobe, etc.)
-- Navigator properties, screen geometry
-- WebRTC IP leak (your real IP even behind a VPN)
-- DNS leak detection
-- HTTP header inconsistencies
-
-Scores everything across 4 dimensions and gives you a hardening guide based on what it found.
+No data leaves your machine except optional external API calls.
 
 ---
 
@@ -31,7 +18,7 @@ Scores everything across 4 dimensions and gives you a hardening guide based on w
 ```bash
 pip install -e .
 cp .env.example .env
-python -c "import secrets; print(secrets.token_hex())"  # paste into SECRET_KEY
+python -c "import secrets; print(secrets.token_hex())"
 python -m glint
 ```
 
@@ -39,14 +26,23 @@ Open `http://127.0.0.1:5000`.
 
 ---
 
+## What it finds
+
+- WebRTC IP leak — real IP exposed even behind a VPN
+- DNS leak — resolver belongs to your ISP, not a private DNS
+- Canvas, audio, and WebGL fingerprints — hardware-level uniqueness
+- Font enumeration — software signatures (Office, Adobe, CAD)
+- HTTP header inconsistencies — language and timezone mismatches
+- Email breach exposure (opt-in, HIBP)
+
+---
+
 ## Optional API keys
 
 Set in `.env`:
 
-- `HIBP_API_KEY` — email breach check (paid, haveibeenpwned.com)
-- `ABUSEIPDB_API_KEY` — IP abuse score (free tier, abuseipdb.com)
-
-Both are optional. The tool works without them.
+- `HIBP_API_KEY` — haveibeenpwned.com (paid)
+- `ABUSEIPDB_API_KEY` — abuseipdb.com (free tier)
 
 ---
 
