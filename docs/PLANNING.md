@@ -40,7 +40,7 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 | ID   | Story | Acceptance Criteria |
 |------|-------|---------------------|
 | HU9 [done]  | As a user, I know if my real IP leaks via WebRTC even with a VPN | Finding `WEBRTC_LEAK` with severity CRITICAL when private IP is exposed |
-| HU10 [pending] | As a user, I know if my DNS resolver belongs to my ISP (DNS leak) | Finding `DNS_LEAK` with severity HIGH when resolver is not a known clean one |
+| HU10 [done] | As a user, I know if my DNS resolver belongs to my ISP (DNS leak) | Finding `DNS_LEAK` with severity HIGH when resolver is not a known clean one |
 | HU11 [done] | As a system, the backend analyzes inconsistencies in HTTP headers | Finding `HEADER_LANG_MISMATCH` when Accept-Language differs from navigator.language |
 | HU12 [done] | As a system, the backend detects timezone inconsistency | Finding `TIMEZONE_MISMATCH` when JS offset doesn't match geolocation-inferred timezone |
 
@@ -53,8 +53,8 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 
 | ID   | Story | Acceptance Criteria |
 |------|-------|---------------------|
-| HU13 | As a user, I can check if my email was exposed in breaches (opt-in) | POST /api/osint returns breach list from HIBP |
-| HU14 | As a user, the email check uses k-anonymity (full email is never sent) | Only the first 5 chars of the SHA-1 hash are sent to HIBP |
+| HU13 [done] | As a user, I can check if my email was exposed in breaches (opt-in) | POST /api/osint returns breach list from HIBP |
+| HU14 [done] | As a user, the email check uses k-anonymity (full email is never sent) | Only the first 5 chars of the SHA-1 hash are sent to HIBP |
 | HU15 [done] | As a system, the user's IP is queried on ip-api.com | `server_observed.ip_reputation` contains country, ISP, proxy flag |
 | HU16 | As a system, IPs with high AbuseIPDB score generate a finding | Finding `IP_ABUSE_HIGH` when confidence > 50 (if API Key is configured) |
 | HU17 [done] | As a system, an external API failure does not break the scan | Dimension score = 0 (neutral), INFO finding explaining unavailability |
