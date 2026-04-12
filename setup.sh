@@ -52,6 +52,7 @@ if [[ "$ans" =~ ^[Yy]$ ]]; then
         echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main" \
             | sudo tee /etc/apt/sources.list.d/cloudflared.list
         sudo apt-get update && sudo apt-get install -y cloudflared
+        export PATH="$PATH:/usr/local/bin"
     else
         echo "[!] could not detect package manager — install cloudflared manually:"
         echo "    https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/"

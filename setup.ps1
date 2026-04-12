@@ -43,6 +43,15 @@ if ($ans -match "^[Yy]$") {
         Write-Host "[ok] cloudflared already installed"
     } elseif (Get-Command winget -ErrorAction SilentlyContinue) {
         winget install Cloudflare.cloudflared
+        # refresh PATH so cloudflared is available in this session
+        $machinePath = [System.Environment]::GetEnvironmentVariable("PATH", "Machine")
+        $userPath    = [System.Environment]::GetEnvironmentVariable("PATH", "User")
+        $env:PATH    = "$machinePath;$userPath"
+        if (-not (Get-Command cloudflared -ErrorAction SilentlyContinue)) {
+            Write-Host "[!] PATH updated but cloudflared not found yet -- open a new terminal before running the tunnel"
+        } else {
+            Write-Host "[ok] cloudflared installed and available"
+        }
     } else {
         Write-Host "[!] winget not available -- download cloudflared manually:"
         Write-Host "    https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/"
