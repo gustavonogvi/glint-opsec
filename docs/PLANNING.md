@@ -73,7 +73,7 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 | HU20 [done] | As a system, the composite score maps to a risk level | CRITICAL/HIGH/MEDIUM/LOW per defined thresholds |
 | HU21 [done] | As a system, findings are generated with severity and evidence | Each finding has: `finding_key`, `severity`, `title`, `description`, `evidence{}` |
 | HU22 [done] | As a system, the uniqueness score (entropy) is calculated separately | `identity_entropy_score` in bits, displayed separately from risk level |
-| HU23 [pending] | As a user, I receive a personalized hardening guide | Recommendations list ordered by priority, specific to my findings |
+| HU23 [done] | As a user, I receive a personalized hardening guide | Recommendations list ordered by priority, specific to my findings |
 
 ---
 
@@ -84,11 +84,11 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 
 | ID   | Story | Acceptance Criteria |
 |------|-------|---------------------|
-| HU24 | As a user, I see a radar chart with the 4 risk dimensions | Chart.js RadarChart renders with colors mapped to severity |
-| HU25 | As a user, I see each finding with a colored severity badge | CRITICAL=red, HIGH=orange, MEDIUM=yellow, LOW=green, INFO=gray |
-| HU26 | As a user, I see the hardening guide with specific steps | Each recommendation has a title, numbered steps, and references |
-| HU27 | As a user, I can view my previous scan history | GET /api/scans → table with scan_id, date, IP, risk_level |
-| HU28 | As a user, the UI follows a dark terminal aesthetic | CSS with dark background, monospace font, terminal colors |
+| HU24 [done] | As a user, I see a risk breakdown with the 4 dimensions | ASCII progress bars with scores, colors mapped to severity (radar chart replaced) |
+| HU25 [done] | As a user, I see each finding with a colored severity badge | CRITICAL=red, HIGH=orange, MEDIUM=yellow, LOW=green; military report format `[01] CRITICAL ── KEY` |
+| HU26 [done] | As a user, I see the hardening guide with specific steps | Each recommendation has a title, numbered steps, and references in SECTION 03 |
+| HU27 [done] | As a user, I can view my previous scan history | GET /api/scans → ARCHIVE / CASE HISTORY page with risk-colored log |
+| HU28 [done] | As a user, the UI follows a dark terminal aesthetic | Military intelligence report: `#00ff41` phosphor green on `#050505`, CRT scanlines, ASCII bars, `<details>` accordions for raw intel |
 
 ---
 
@@ -145,13 +145,13 @@ Phase 3 — DNS Leak + HIBP                          [done]
 ├── glint/collectors/hibp.py ✓
 └── glint/api/osint.py ✓
 
-Phase 4 — Dashboard                                [pending]
-├── templates/results.html
-├── templates/history.html
-├── static/js/dashboard/radar.js
-├── static/js/dashboard/findings.js
-├── glint/engine/hardening.py
-└── glint/api/scan.py
+Phase 4 — Dashboard                                [done]
+├── templates/results.html ✓
+├── templates/history.html ✓
+├── static/js/dashboard/radar.js ✓
+├── static/js/dashboard/findings.js ✓
+├── glint/engine/hardening.py ✓
+└── glint/api/scan.py ✓
 
 Phase 5 — Polish                                   [pending]
 ├── static/css/dashboard.css
