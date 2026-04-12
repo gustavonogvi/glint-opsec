@@ -369,7 +369,7 @@ function renderRawPanel(data) {
     const scrBody = kv("resolution", scr.screen_width + "×" + scr.screen_height)
         + kv("window",      scr.window_inner_width + "×" + scr.window_inner_height)
         + kv("color_depth", scr.color_depth)
-        + kv("dpr",         scr.device_pixel_ratio)
+        + kv("dpr",         scr.pixel_ratio)
         + kv("orientation", scr.orientation);
 
     // WEBRTC
