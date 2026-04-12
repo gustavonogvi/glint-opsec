@@ -72,9 +72,23 @@ def score_anonymity(browser: dict) -> DimensionScore:
 
     if not browser.get("canvas_blocked"):
         score += 15.0
+        findings.append(_finding(
+            "CANVAS_UNIQUE", "HIGH",
+            "Canvas fingerprint exposed",
+            "Browser rendered a unique canvas signature. This hash can identify you across sites.",
+            "anonymity",
+            {"canvas_hash": browser.get("canvas_hash", "")[:16] + "..."},
+        ))
 
     if not browser.get("audio_blocked"):
         score += 10.0
+        findings.append(_finding(
+            "AUDIO_UNIQUE", "MEDIUM",
+            "Audio fingerprint exposed",
+            "AudioContext produced a unique hardware signature. Varies by GPU, OS, and driver.",
+            "anonymity",
+            {"audio_hash": browser.get("audio_hash", "")[:16] + "..."},
+        ))
 
     score = min(score, 100.0)
     return DimensionScore(name="anonymity", score=round(score, 2), findings=findings)

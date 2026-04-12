@@ -154,7 +154,7 @@ def generate(scan_id: str, created_at: str, ip_address: str,
     # screen
     out("  screen:")
     for k in ["screen_width","screen_height","window_inner_width",
-              "window_inner_height","device_pixel_ratio","color_depth","orientation"]:
+              "window_inner_height","pixel_ratio","color_depth","orientation"]:
         v = scr.get(k)
         if v not in (None, ""):
             out(f"    {k:<24}  {v}")
