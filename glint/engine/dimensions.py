@@ -100,7 +100,9 @@ def score_network(browser: dict, headers: HeaderAnalysis,
             ))
 
         stun_ip = webrtc.get("public_ip_via_stun")
-        if stun_ip and remote_ip and stun_ip != remote_ip:
+        _private = ("127.", "10.", "192.168.", "::1", "localhost")
+        _server_is_local = remote_ip and any(remote_ip.startswith(p) for p in _private)
+        if stun_ip and remote_ip and stun_ip != remote_ip and not _server_is_local:
             score += 20.0
             findings.append(_finding(
                 "WEBRTC_VPN_BYPASS", "HIGH",
