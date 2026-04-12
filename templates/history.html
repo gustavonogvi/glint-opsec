@@ -4,92 +4,88 @@
 
 {% block head %}
 <style>
-    body { align-items: flex-start; justify-content: flex-start; padding: 3rem 2rem; }
+    body { align-items: flex-start; justify-content: flex-start; padding: 2rem; }
 
     .page { width: 100%; max-width: 820px; margin: 0 auto; font-size: 0.78rem; }
 
     .header {
-        margin-bottom: 2.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #004d18;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #0d2b14;
     }
-    .header-meta  { color: #004d18; font-size: 0.62rem; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
-    .header-title { color: #00ff41; font-size: 0.72rem; letter-spacing: 0.3em; font-weight: bold; }
+    .header-meta  { color: #006622; font-size: 0.68rem; margin-bottom: 0.2rem; }
+    .header-title { color: #00cc33; font-size: 0.72rem; font-weight: bold; }
 
     .section-head {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.2rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid #004d18;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid #0d2b14;
     }
-    .section-num  { color: #004d18; font-size: 0.65rem; letter-spacing: 0.15em; }
-    .section-name { color: #00ff41; font-size: 0.72rem; letter-spacing: 0.25em; font-weight: bold; }
-    .section-count { color: #004d18; font-size: 0.65rem; margin-left: auto; letter-spacing: 0.1em; }
-    .section-rule { flex: 1; height: 1px; background: #004d18; }
+    .section-num   { color: #004d18; font-size: 0.65rem; }
+    .section-name  { color: #00cc33; font-size: 0.72rem; font-weight: bold; }
+    .section-count { color: #004d18; font-size: 0.65rem; margin-left: auto; }
 
     table { width: 100%; border-collapse: collapse; }
 
     th {
         text-align: left;
-        color: #007a22;
-        font-size: 0.62rem;
-        letter-spacing: 0.2em;
-        padding: 0 1rem 0.7rem 0;
-        border-bottom: 1px solid #002a0d;
+        color: #006622;
+        font-size: 0.65rem;
+        padding: 0 1rem 0.5rem 0;
+        border-bottom: 1px solid #0d2b14;
         font-weight: normal;
     }
     td {
-        padding: 0.55rem 1rem 0.55rem 0;
-        border-bottom: 1px solid #001a08;
+        padding: 0.4rem 1rem 0.4rem 0;
+        border-bottom: 1px solid #0d2b14;
         color: #00cc33;
         font-size: 0.72rem;
         vertical-align: middle;
     }
-    tr:hover td { background: #020f04; }
+    tr:hover td { background: #0d0d0d; }
 
-    .col-ref   { color: #004d18; font-size: 0.65rem; width: 2rem; }
-    .col-id    { font-size: 0.68rem; }
-    .col-id a  { color: #00cc33; letter-spacing: 0.03em; }
-    .col-id a:hover { color: #00ff41; opacity: 1; }
-    .col-date  { color: #007a22; font-size: 0.68rem; }
-    .col-ip    { color: #007a22; font-size: 0.68rem; }
-    .col-score { font-weight: bold; font-size: 0.9rem; }
-    .col-level { font-size: 0.65rem; letter-spacing: 0.15em; font-weight: bold; }
+    .col-ref  { color: #004d18; font-size: 0.65rem; width: 2rem; }
+    .col-id a { color: #00cc33; }
+    .col-id a:hover { color: #00ff41; }
+    .col-date { color: #006622; font-size: 0.68rem; }
+    .col-ip   { color: #006622; font-size: 0.68rem; }
+    .col-score { font-weight: bold; }
 
-    .risk-CRITICAL { color: #ff3333; }
-    .risk-HIGH     { color: #ff8800; }
-    .risk-MEDIUM   { color: #ffff00; }
-    .risk-LOW      { color: #00ff41; }
+    .risk-CRITICAL { color: #e63636; }
+    .risk-HIGH     { color: #cc6600; }
+    .risk-MEDIUM   { color: #cccc00; }
+    .risk-LOW      { color: #00cc33; }
 
-    .empty { color: #004d18; font-size: 0.75rem; padding: 3rem 0; }
-    .error { color: #ff3333; font-size: 0.75rem; padding: 3rem 0; }
+    .empty { color: #006622; font-size: 0.72rem; padding: 2rem 0; }
+    .error { color: #e63636; font-size: 0.72rem; padding: 2rem 0; }
 
     .nav-links {
-        margin-top: 2.5rem;
-        padding-top: 1rem;
-        border-top: 1px solid #004d18;
+        margin-top: 1.5rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid #0d2b14;
         display: flex;
         gap: 2rem;
         font-size: 0.68rem;
     }
-    .nav-links a { color: #007a22; }
-    .nav-links a:hover { color: #00cc33; opacity: 1; }
+    .nav-links a { color: #006622; }
+    .nav-links a:hover { color: #00cc33; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="page">
     <div class="header">
-        <div class="header-meta">ARCHIVE</div>
-        <div class="header-title">CASE HISTORY</div>
+        <div class="header-meta">archive</div>
+        <div class="header-title">case history</div>
     </div>
 
-    <div id="content"><p class="empty">RETRIEVING ARCHIVE...</p></div>
+    <div id="content"><p class="empty">loading...</p></div>
 
     <div class="nav-links">
-        <a href="/">← NEW SCAN</a>
+        <a href="/">← new scan</a>
     </div>
 </div>
 
@@ -99,14 +95,14 @@ async function load() {
 
     const response = await fetch("/api/scans");
     if (!response.ok) {
-        container.innerHTML = '<p class="error">FAILED TO RETRIEVE ARCHIVE</p>';
+        container.innerHTML = '<p class="error">failed to retrieve archive</p>';
         return;
     }
 
     const scans = await response.json();
 
     if (scans.length === 0) {
-        container.innerHTML = '<p class="empty">NO CASES ON RECORD</p>';
+        container.innerHTML = '<p class="empty">no cases on record</p>';
         return;
     }
 
@@ -120,25 +116,25 @@ async function load() {
             <td class="col-date">${esc(date)}</td>
             <td class="col-ip">${esc(s.ip_address)}</td>
             <td class="col-score risk-${esc(s.risk_level)}">${esc(s.composite_score.toFixed(2))}</td>
-            <td class="col-level risk-${esc(s.risk_level)}">${esc(s.risk_level)}</td>
+            <td class="risk-${esc(s.risk_level)}">${esc(s.risk_level)}</td>
         </tr>`;
     }).join("");
 
     container.innerHTML = `
 <div class="section-head">
-    <span class="section-num">SECTION 01</span>
-    <span class="section-name">CASE LOG</span>
-    <span class="section-count">[${scans.length} RECORDS]</span>
+    <span class="section-num">section 01</span>
+    <span class="section-name">case log</span>
+    <span class="section-count">[${scans.length} records]</span>
 </div>
 <table>
     <thead>
         <tr>
             <th></th>
-            <th>CASE ID</th>
-            <th>ASSESSED</th>
-            <th>SUBJECT IP</th>
-            <th>INDEX</th>
-            <th>CLASS</th>
+            <th>case id</th>
+            <th>assessed</th>
+            <th>subject ip</th>
+            <th>index</th>
+            <th>class</th>
         </tr>
     </thead>
     <tbody>${rows}</tbody>
