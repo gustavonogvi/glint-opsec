@@ -75,6 +75,28 @@ RULES: dict[str, Recommendation] = {
             "Brave: fingerprint protection is enabled by default in Shields",
         ],
     ),
+    "CANVAS_EXPOSED": Recommendation(
+        finding_key="CANVAS_EXPOSED",
+        priority="HIGH",
+        title="Block canvas fingerprinting",
+        steps=[
+            "Firefox: set privacy.resistFingerprinting = true in about:config",
+            "Brave: Shields -> Fingerprinting -> Block all fingerprinting",
+            "Chrome: install 'Canvas Fingerprint Defender' extension",
+            "Tor Browser blocks canvas reads by default",
+        ],
+        references=["https://browserleaks.com/canvas"],
+    ),
+    "AUDIO_EXPOSED": Recommendation(
+        finding_key="AUDIO_EXPOSED",
+        priority="MEDIUM",
+        title="Block AudioContext fingerprinting",
+        steps=[
+            "Firefox: privacy.resistFingerprinting also covers AudioContext",
+            "Brave Shields blocks audio fingerprinting by default",
+            "Safari 17+ injects noise into AudioContext in Private mode",
+        ],
+    ),
     "FONT_COUNT_HIGH": Recommendation(
         finding_key="FONT_COUNT_HIGH",
         priority="MEDIUM",
