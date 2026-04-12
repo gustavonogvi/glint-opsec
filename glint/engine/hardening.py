@@ -18,7 +18,7 @@ RULES: dict[str, Recommendation] = {
         steps=[
             "Firefox: set media.peerconnection.enabled = false in about:config",
             "Chrome/Opera: install 'WebRTC Leak Prevent' extension",
-            "Brave: Settings → Privacy → WebRTC IP handling → Disable non-proxied UDP",
+            "Brave: Settings -> Privacy -> WebRTC IP handling -> Disable non-proxied UDP",
             "Verify fix at browserleaks.com/webrtc",
         ],
         references=["https://browserleaks.com/webrtc"],
@@ -39,8 +39,8 @@ RULES: dict[str, Recommendation] = {
         title="Switch to a private DNS resolver",
         steps=[
             "Set DNS to 1.1.1.1 (Cloudflare) or 9.9.9.9 (Quad9) in network settings",
-            "Enable DNS over HTTPS in your browser: Settings → Privacy → DNS over HTTPS",
-            "Firefox: about:config → network.trr.mode = 2 (DoH enabled)",
+            "Enable DNS over HTTPS in your browser: Settings -> Privacy -> DNS over HTTPS",
+            "Firefox: about:config -> network.trr.mode = 2 (DoH enabled)",
             "Verify at 1.1.1.1/help or dnsleaktest.com",
         ],
         references=["https://1.1.1.1/dns/"],
@@ -52,7 +52,7 @@ RULES: dict[str, Recommendation] = {
         steps=[
             "Set browser language to match your intended locale",
             "Or use a browser profile with consistent language settings",
-            "Firefox: about:config → intl.accept_languages",
+            "Firefox: about:config -> intl.accept_languages",
         ],
     ),
     "TIMEZONE_MISMATCH": Recommendation(
