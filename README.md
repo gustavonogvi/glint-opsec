@@ -93,7 +93,3 @@ Set in `.env`:
 
 - `HIBP_API_KEY` — haveibeenpwned.com (paid)
 - `ABUSEIPDB_API_KEY` — abuseipdb.com (free tier)
-
----
-
-Part of the [CBS Blue Team](https://github.com/gustavonogvi) ecosystem alongside Naberius and Vassago.
