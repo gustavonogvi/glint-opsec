@@ -96,7 +96,8 @@ def score_anonymity(browser: dict) -> DimensionScore:
 
 def score_network(browser: dict, headers: HeaderAnalysis,
                   remote_ip: str, ip_rep: IPReputation,
-                  dns_leak: DNSLeakResult) -> DimensionScore:
+                  dns_leak: DNSLeakResult,
+                  stun_ip_rep: IPReputation | None = None) -> DimensionScore:
     score = 0.0
     findings = []
 
@@ -116,7 +117,12 @@ def score_network(browser: dict, headers: HeaderAnalysis,
         stun_ip = webrtc.get("public_ip_via_stun")
         _private = ("127.", "10.", "192.168.", "::1", "localhost")
         _server_is_local = remote_ip and any(remote_ip.startswith(p) for p in _private)
-        if stun_ip and remote_ip and stun_ip != remote_ip and not _server_is_local:
+        _same_asn = (
+            stun_ip_rep and stun_ip_rep.asn
+            and ip_rep.asn
+            and stun_ip_rep.asn == ip_rep.asn
+        )
+        if stun_ip and remote_ip and stun_ip != remote_ip and not _server_is_local and not _same_asn:
             score += 20.0
             findings.append(_finding(
                 "WEBRTC_VPN_BYPASS", "HIGH",

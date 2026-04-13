@@ -9,6 +9,7 @@ class IPReputation:
     country_code: str | None
     isp: str | None
     org: str | None
+    asn: str | None
     is_proxy: bool
     is_hosting: bool
     timezone: str | None
@@ -23,6 +24,7 @@ def collect(ip: str) -> IPReputation:
             country_code=None,
             isp=None,
             org=None,
+            asn=None,
             is_proxy=False,
             is_hosting=False,
             timezone=None,
@@ -32,7 +34,7 @@ def collect(ip: str) -> IPReputation:
     try:
         response = httpx.get(
             f"http://ip-api.com/json/{ip}",
-            params={"fields": "status,country,countryCode,isp,org,proxy,hosting,timezone"},
+            params={"fields": "status,country,countryCode,isp,org,as,proxy,hosting,timezone"},
             timeout=5.0,
         )
         data = response.json()
@@ -46,6 +48,7 @@ def collect(ip: str) -> IPReputation:
             country_code=data.get("countryCode"),
             isp=data.get("isp"),
             org=data.get("org"),
+            asn=data.get("as"),
             is_proxy=bool(data.get("proxy", False)),
             is_hosting=bool(data.get("hosting", False)),
             timezone=data.get("timezone"),
@@ -59,6 +62,7 @@ def collect(ip: str) -> IPReputation:
             country_code=None,
             isp=None,
             org=None,
+            asn=None,
             is_proxy=False,
             is_hosting=False,
             timezone=None,

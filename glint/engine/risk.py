@@ -80,8 +80,16 @@ def run(scan_id: str, payload: dict, remote_ip: str,
     dns_result    = collect_dns(clean_resolvers or [])
     entropy_score = entropy.calculate(browser)
 
+    _private = ("127.", "10.", "192.168.", "::1", "localhost")
+    stun_ip   = (browser.get("webrtc") or {}).get("public_ip_via_stun")
+    stun_ip_rep = (
+        collect_ip(stun_ip)
+        if stun_ip and not any(stun_ip.startswith(p) for p in _private)
+        else None
+    )
+
     dim_anonymity     = dimensions.score_anonymity(browser)
-    dim_network       = dimensions.score_network(browser, headers, remote_ip, ip_rep, dns_result)
+    dim_network       = dimensions.score_network(browser, headers, remote_ip, ip_rep, dns_result, stun_ip_rep)
     dim_data_exposure = dimensions.score_data_exposure(browser)
     dim_ip_reputation = dimensions.score_ip_reputation(ip_rep)
 
