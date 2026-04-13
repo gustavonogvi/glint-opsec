@@ -1,5 +1,7 @@
 import uuid
 import ipaddress
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from dataclasses import dataclass, field
 from glint.collectors.http_headers import HeaderAnalysis
 from glint.collectors.ip_reputation import IPReputation
@@ -11,6 +13,13 @@ def _is_private_ip(ip: str) -> bool:
         return ipaddress.ip_address(ip).is_private
     except ValueError:
         return False
+
+
+def _tz_offset(name: str) -> int | None:
+    try:
+        return int(datetime.now(ZoneInfo(name)).utcoffset().total_seconds())
+    except Exception:
+        return None
 
 
 @dataclass
@@ -153,7 +162,7 @@ def score_network(browser: dict, headers: HeaderAnalysis,
     nav = browser.get("navigator", {})
     nav_tz = nav.get("timezone")
     ip_tz  = ip_rep.timezone if ip_rep.available else None
-    if nav_tz and ip_tz and nav_tz != ip_tz:
+    if nav_tz and ip_tz and nav_tz != ip_tz and _tz_offset(nav_tz) != _tz_offset(ip_tz):
         score += 20.0
         findings.append(_finding(
             "TIMEZONE_MISMATCH", "MEDIUM",
