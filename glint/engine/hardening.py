@@ -28,9 +28,10 @@ RULES: dict[str, Recommendation] = {
         priority="HIGH",
         title="Fix WebRTC VPN bypass",
         steps=[
-            "Enable WebRTC leak protection in your VPN client settings",
-            "Or disable WebRTC entirely (see WEBRTC_LEAK recommendation)",
-            "Confirm your VPN routes all traffic including UDP",
+            "NordVPN, Mullvad, ProtonVPN, ExpressVPN: WebRTC leak protection is enabled by default in their browser extensions",
+            "Firefox: set media.peerconnection.enabled = false in about:config to disable WebRTC entirely",
+            "Chrome: install 'WebRTC Leak Prevent' extension from the Chrome Web Store",
+            "Confirm your VPN routes all UDP traffic, not just TCP",
         ],
     ),
     "DNS_LEAK": Recommendation(
@@ -50,9 +51,10 @@ RULES: dict[str, Recommendation] = {
         priority="MEDIUM",
         title="Align browser language with Accept-Language header",
         steps=[
-            "Set browser language to match your intended locale",
-            "Or use a browser profile with consistent language settings",
-            "Firefox: about:config -> intl.accept_languages",
+            "Chrome: Settings -> Languages and input -> Languages -> reorder to match your intended locale",
+            "Firefox: Preferences -> General -> Languages -> reorder, or about:config -> intl.accept_languages",
+            "Edge: edge://settings/languages -> reorder languages to match intended locale",
+            "Or use a dedicated browser profile with consistent language settings",
         ],
     ),
     "TIMEZONE_MISMATCH": Recommendation(
@@ -102,9 +104,10 @@ RULES: dict[str, Recommendation] = {
         priority="MEDIUM",
         title="Reduce font fingerprint surface",
         steps=[
-            "Enable privacy.resistFingerprinting in Firefox to normalize font metrics",
-            "Brave Shields blocks font enumeration by default",
-            "Avoid installing unnecessary fonts from professional software suites",
+            "Firefox: privacy.resistFingerprinting = true normalizes font metrics, reducing visible font count significantly",
+            "Brave: Shields randomizes the set of available fonts per site and session, preventing stable enumeration",
+            "Chrome: no native protection; font fingerprinting cannot be mitigated without switching browsers",
+            "Tor Browser provides the strongest font normalization by design",
         ],
     ),
     "BREACH_FOUND": Recommendation(
