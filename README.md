@@ -64,6 +64,12 @@ winget install Cloudflare.cloudflared
 cloudflared tunnel --url http://localhost:5000
 ```
 
+After running, look for this line in the terminal output:
+```
+Your quick Tunnel has been created! Visit it at: https://xxxx.trycloudflare.com
+```
+Open that URL in your browser to run the assessment.
+
 Both give you a temporary public URL. Open it from a different network (mobile on 4G, another machine) to get a real assessment. The server already reads `X-Forwarded-For` headers set by these proxies — no extra configuration needed.
 
 For a meaningful VPN bypass test: enable your VPN, open the URL, and check if WEBRTC_VPN_BYPASS fires.
