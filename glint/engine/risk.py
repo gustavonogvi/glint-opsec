@@ -1,3 +1,4 @@
+import ipaddress
 from dataclasses import dataclass, field
 from glint.collectors.http_headers import analyze as analyze_headers
 from glint.collectors.ip_reputation import collect as collect_ip
@@ -80,11 +81,16 @@ def run(scan_id: str, payload: dict, remote_ip: str,
     dns_result    = collect_dns(clean_resolvers or [])
     entropy_score = entropy.calculate(browser)
 
-    _private = ("127.", "10.", "192.168.", "::1", "localhost")
-    stun_ip   = (browser.get("webrtc") or {}).get("public_ip_via_stun")
+    def _is_private(ip: str) -> bool:
+        try:
+            return ipaddress.ip_address(ip).is_private
+        except ValueError:
+            return False
+
+    stun_ip = (browser.get("webrtc") or {}).get("public_ip_via_stun")
     stun_ip_rep = (
         collect_ip(stun_ip)
-        if stun_ip and not any(stun_ip.startswith(p) for p in _private)
+        if stun_ip and not _is_private(stun_ip)
         else None
     )
 

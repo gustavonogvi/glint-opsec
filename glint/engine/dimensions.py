@@ -1,8 +1,16 @@
 import uuid
+import ipaddress
 from dataclasses import dataclass, field
 from glint.collectors.http_headers import HeaderAnalysis
 from glint.collectors.ip_reputation import IPReputation
 from glint.collectors.dns_leak import DNSLeakResult
+
+
+def _is_private_ip(ip: str) -> bool:
+    try:
+        return ipaddress.ip_address(ip).is_private
+    except ValueError:
+        return False
 
 
 @dataclass
@@ -115,8 +123,7 @@ def score_network(browser: dict, headers: HeaderAnalysis,
             ))
 
         stun_ip = webrtc.get("public_ip_via_stun")
-        _private = ("127.", "10.", "192.168.", "::1", "localhost")
-        _server_is_local = remote_ip and any(remote_ip.startswith(p) for p in _private)
+        _server_is_local = remote_ip and _is_private_ip(remote_ip)
         _same_asn = (
             stun_ip_rep and stun_ip_rep.asn
             and ip_rep.asn
