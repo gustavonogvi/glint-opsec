@@ -314,6 +314,7 @@ function renderRawPanel(data) {
         ["webgl",    wgl.webgl_blocked   ? 0 : (wgl.unmasked ? 17 : 8)],
         ["fonts",    b.fonts_blocked     ? 0 : Math.min(Math.round((b.font_count || 0) / 5), 15)],
         ["navigator",(nav.hardware_concurrency && nav.device_memory) ? 8 : 3],
+        ["intl",     nav.intl ? 2 : 0],
         ["screen",   4],
     ];
     const totalEntropy = entropyItems.reduce((s, [, v]) => s + v, 0);
@@ -362,6 +363,9 @@ function renderRawPanel(data) {
         + kv("touch",      nav.max_touch_points)
         + kv("connection", nav.connection_type)
         + kv("plugins",    nav.plugin_count)
+        + (nav.intl ? kv("intl.locale",   nav.intl.locale)
+                    + kv("intl.calendar", nav.intl.calendar)
+                    + kv("intl.numbering",nav.intl.numbering_system) : "")
         + `<hr class="raw-divider">`
         + `<div class="raw-line raw-val-dim" style="word-break:break-all">${esc(nav.user_agent || "")}</div>`;
 

@@ -2,8 +2,14 @@ export function collectNavigator() {
     try {
         const nav = window.navigator;
 
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const intlOpts = Intl.DateTimeFormat().resolvedOptions();
+        const timezone = intlOpts.timeZone;
         const timezoneOffset = new Date().getTimezoneOffset();
+        const intl = {
+            locale:           intlOpts.locale,
+            calendar:         intlOpts.calendar,
+            numbering_system: intlOpts.numberingSystem,
+        };
 
         const touchSupport = {
             max_touch_points: nav.maxTouchPoints ?? 0,
@@ -58,6 +64,7 @@ export function collectNavigator() {
             do_not_track:         nav.doNotTrack,
             timezone,
             timezone_offset:      timezoneOffset,
+            intl,
             touch_support:        touchSupport,
             pdf_viewer_enabled:   pdfViewerEnabled,
             connection_type:      connectionType,

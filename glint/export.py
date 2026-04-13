@@ -149,6 +149,11 @@ def generate(scan_id: str, created_at: str, ip_address: str,
         v = nav.get(k)
         if v not in (None, ""):
             out(f"    {k:<24}  {v}")
+    intl = nav.get("intl") or {}
+    if intl:
+        out(f"    {'intl.locale':<24}  {intl.get('locale', '')}")
+        out(f"    {'intl.calendar':<24}  {intl.get('calendar', '')}")
+        out(f"    {'intl.numbering_system':<24}  {intl.get('numbering_system', '')}")
     out("")
 
     # screen

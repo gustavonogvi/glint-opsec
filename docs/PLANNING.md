@@ -24,7 +24,7 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 | HU1 [done]        | As a user, when I open the tool, my canvas fingerprint is collected automatically | `canvas_hash` present in the payload sent to the backend |
 | HU2 [done]        | As a user, my AudioContext fingerprint is collected | `audio_hash` present in the payload |
 | HU3 [done]        | As a user, my installed font list is enumerated | `fonts[]` detected, `font_groups[]` with software signatures (ms_office, adobe_cc, coding, etc.), `fonts_blocked` flag if browser normalizes measurements |
-| HU4 [done]        | As a user, `navigator` properties are collected | UA, language, platform, hardwareConcurrency, timezone present |
+| HU4 [done]        | As a user, `navigator` properties are collected | UA, language, platform, hardwareConcurrency, timezone, Intl (locale, calendar, numberingSystem) present |
 | HU5 [done]        | As a user, screen vs. window geometry is captured | `screen_width`, `window_inner_width` are distinct (when toolbar is present) |
 | HU6 [done]        | As a user, WebRTC attempts to collect my real IP | `webrtc.local_ips[]` populated if WebRTC is not blocked |
 | HU7 [done]        | As a user, WebGL vendor/renderer is collected | `webgl.vendor` and `webgl.renderer` present |
@@ -183,8 +183,8 @@ Complete list of findings the system can generate:
 | `DNS_LEAK`             | network       | HIGH     | System resolver is ISP, not VPN/DoH                       |
 | `HEADER_LANG_MISMATCH` | network       | MEDIUM   | Accept-Language ≠ navigator.language                      |
 | `TIMEZONE_MISMATCH`    | network       | MEDIUM   | JS timezone inconsistent with IP geolocation              |
-| `CANVAS_UNIQUE`        | anonymity     | HIGH     | Canvas hash is rare (< 1% of known samples)               |
-| `AUDIO_UNIQUE`         | anonymity     | MEDIUM   | Audio hash is rare                                        |
+| `CANVAS_EXPOSED`       | anonymity     | HIGH     | Canvas fingerprint collected (not blocked by browser)     |
+| `AUDIO_EXPOSED`        | anonymity     | MEDIUM   | AudioContext fingerprint collected (not blocked)          |
 | `FONT_COUNT_HIGH`      | anonymity     | MEDIUM   | Too many installed fonts (> 80)                           |
 | `WEBGL_SPECIFIC`       | anonymity     | MEDIUM   | Specific and identifiable GPU renderer                    |
 | `UA_INCONSISTENT`      | anonymity     | LOW      | Unusual or inconsistent User-Agent                        |

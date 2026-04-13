@@ -16,6 +16,7 @@ _SIGNALS = {
     "screen":           3.0,
     "mdns":             8.0,
     "local_ip":         2.0,
+    "intl":             2.0,
 }
 
 # Each signal after the first contributes at this fraction (correlation discount)
@@ -66,6 +67,9 @@ def calculate(browser: dict) -> float:
             add("hw_concurrency")
         if nav.get("device_memory"):
             add("device_memory")
+
+    if nav.get("intl"):
+        add("intl")
 
     screen = browser.get("screen", {})
     if screen and screen.get("screen_width"):
