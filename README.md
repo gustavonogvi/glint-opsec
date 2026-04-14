@@ -93,3 +93,26 @@ Set in `.env`:
 
 - `HIBP_API_KEY` — haveibeenpwned.com (paid)
 - `ABUSEIPDB_API_KEY` — abuseipdb.com (free tier)
+
+---
+
+## References
+
+**Fingerprinting**
+- [AmIUnique](https://amiunique.org) — live research on browser fingerprint uniqueness
+- [BrowserLeaks](https://browserleaks.com) — practical reference for browser API exposure
+- "How Unique Is Your Web Browser?" — Eckersley, EFF (2010)
+- "Browser Fingerprinting: A Survey" — Laperdrix et al. (2020)
+- "Pixel Perfect: Fingerprinting Canvas in HTML5" — Mowery & Shacham (2012)
+
+**WebRTC & IP Leaks**
+- [MDN: RTCPeerConnection](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection)
+- [WebRTC Leak Test — BrowserLeaks](https://browserleaks.com/webrtc)
+
+**DNS**
+- [DNS Leak Test](https://dnsleaktest.com)
+- [RFC 1918 — Private Address Space](https://datatracker.ietf.org/doc/html/rfc1918)
+
+**APIs**
+- [ip-api.com docs](https://ip-api.com/docs) — IP geolocation and ASN lookup
+- [Have I Been Pwned API](https://haveibeenpwned.com/API/v3) — email breach check (requires paid key)
