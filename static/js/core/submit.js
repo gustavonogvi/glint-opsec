@@ -109,7 +109,7 @@ function onProgress(name, result) {
     }
 }
 
-async function run(email) {
+async function run() {
     log("initializing collectors...", "#007a22");
     setStatus("[ SCANNING ]");
 
@@ -120,13 +120,10 @@ async function run(email) {
         log("payload assembled — transmitting...", "#00ff41");
         setStatus("[ TRANSMITTING ]", "#00ff41");
 
-        const payload = { browser };
-        if (email) payload.email = email;
-
         const response = await fetch("/api/fingerprint", {
             method:  "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify(payload),
+            body:    JSON.stringify({ browser }),
         });
 
         if (!response.ok) {
@@ -150,17 +147,5 @@ async function run(email) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const btn   = document.getElementById("scan-btn");
-    const input = document.getElementById("email-input");
-    const form  = document.getElementById("email-form");
-    const logArea = document.getElementById("log-area");
-
-    if (btn) {
-        btn.addEventListener("click", () => {
-            const email = input ? input.value.trim() : "";
-            if (form)    form.style.display    = "none";
-            if (logArea) logArea.style.display = "block";
-            run(email);
-        });
-    }
+    run();
 });
