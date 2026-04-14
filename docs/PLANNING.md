@@ -53,7 +53,7 @@ calculates a multi-dimensional risk score, and delivers a personalized hardening
 
 | ID   | Story | Acceptance Criteria |
 |------|-------|---------------------|
-| HU13 [done] | As a user, I can check if my email was exposed in breaches (opt-in) | POST /api/osint returns breach list from HIBP |
+| HU13 [done] | As a user, I can check if my email was exposed in breaches (opt-in) | Email field on index.html — result appears inline in data_exposure dimension |
 | HU14 [done] | As a user, the email check uses k-anonymity (full email is never sent) | Only the first 5 chars of the SHA-1 hash are sent to HIBP |
 | HU15 [done] | As a system, the user's IP is queried on ip-api.com | `server_observed.ip_reputation` contains country, ISP, proxy flag |
 | HU16 [todo] | As a system, IPs with high AbuseIPDB score generate a finding | Finding `IP_ABUSE_HIGH` when confidence > 50 (if API Key is configured) |
