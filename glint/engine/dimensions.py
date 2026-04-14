@@ -212,7 +212,7 @@ def score_data_exposure(browser: dict, hibp: HIBPResult | None = None) -> Dimens
         findings.append(_finding(
             "NO_EMAIL_CHECKED", "INFO",
             "Breach check unavailable",
-            "HIBP API key not configured or request failed.",
+            "HIBP API key not configured. Set HIBP_API_KEY in .env (paid subscription at haveibeenpwned.com/API/Key).",
             "data_exposure",
         ))
         return DimensionScore(name="data_exposure", score=0.0, findings=findings)

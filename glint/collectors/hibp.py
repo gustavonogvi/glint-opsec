@@ -1,4 +1,3 @@
-import hashlib
 import httpx
 from dataclasses import dataclass, field
 
@@ -63,21 +62,3 @@ def check_email(email: str, api_key: str) -> HIBPResult:
         )
 
 
-def check_password(password: str) -> int:
-    sha1    = hashlib.sha1(password.encode()).hexdigest().upper()
-    prefix  = sha1[:5]
-    suffix  = sha1[5:]
-
-    try:
-        response = httpx.get(
-            f"https://api.pwnedpasswords.com/range/{prefix}",
-            timeout=5.0,
-        )
-        for line in response.text.splitlines():
-            parts = line.split(":")
-            if len(parts) == 2 and parts[0] == suffix:
-                return int(parts[1])
-        return 0
-
-    except Exception:
-        return -1
