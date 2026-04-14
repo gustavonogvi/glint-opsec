@@ -162,7 +162,11 @@ def score_network(browser: dict, headers: HeaderAnalysis,
     nav = browser.get("navigator", {})
     nav_tz = nav.get("timezone")
     ip_tz  = ip_rep.timezone if ip_rep.available else None
-    if nav_tz and ip_tz and nav_tz != ip_tz and _tz_offset(nav_tz) != _tz_offset(ip_tz):
+    if nav_tz and ip_tz and nav_tz != ip_tz:
+        nav_offset = _tz_offset(nav_tz)
+        ip_offset  = _tz_offset(ip_tz)
+        offsets_differ = (nav_offset is None or ip_offset is None or nav_offset != ip_offset)
+    if nav_tz and ip_tz and nav_tz != ip_tz and offsets_differ:
         score += 20.0
         findings.append(_finding(
             "TIMEZONE_MISMATCH", "MEDIUM",
