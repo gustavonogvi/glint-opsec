@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from glint.collectors.http_headers import HeaderAnalysis
 from glint.collectors.ip_reputation import IPReputation
 from glint.collectors.dns_leak import DNSLeakResult
+from glint.collectors.hibp import HIBPResult
 
 
 def _is_private_ip(ip: str) -> bool:
@@ -194,16 +195,48 @@ def score_network(browser: dict, headers: HeaderAnalysis,
     return DimensionScore(name="network", score=round(score, 2), findings=findings)
 
 
-def score_data_exposure(browser: dict) -> DimensionScore:
-    findings = [
-        _finding(
+def score_data_exposure(browser: dict, hibp: HIBPResult | None = None) -> DimensionScore:
+    score    = 0.0
+    findings = []
+
+    if not hibp:
+        findings.append(_finding(
             "NO_EMAIL_CHECKED", "INFO",
             "No email checked",
             "No email was provided for breach check.",
             "data_exposure",
-        )
-    ]
-    return DimensionScore(name="data_exposure", score=0.0, findings=findings)
+        ))
+        return DimensionScore(name="data_exposure", score=0.0, findings=findings)
+
+    if not hibp.available:
+        findings.append(_finding(
+            "NO_EMAIL_CHECKED", "INFO",
+            "Breach check unavailable",
+            "HIBP API key not configured or request failed.",
+            "data_exposure",
+        ))
+        return DimensionScore(name="data_exposure", score=0.0, findings=findings)
+
+    if hibp.breach_count == 0:
+        findings.append(_finding(
+            "EMAIL_CLEAN", "INFO",
+            "No breaches found",
+            "This email was not found in any known breach.",
+            "data_exposure",
+        ))
+        return DimensionScore(name="data_exposure", score=0.0, findings=findings)
+
+    score = min(hibp.breach_count * 12.0, 60.0)
+    findings.append(_finding(
+        "BREACH_FOUND", "HIGH",
+        "Email found in breaches",
+        f"This email appeared in {hibp.breach_count} known breach(es).",
+        "data_exposure",
+        {"breach_count": hibp.breach_count,
+         "breaches": [b.get("Name") for b in hibp.breaches[:5]]},
+    ))
+
+    return DimensionScore(name="data_exposure", score=round(score, 2), findings=findings)
 
 
 def score_ip_reputation(ip_rep: IPReputation) -> DimensionScore:

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from glint.collectors.http_headers import analyze as analyze_headers
 from glint.collectors.ip_reputation import collect as collect_ip
 from glint.collectors.dns_leak import collect as collect_dns
+from glint.collectors.hibp import check_email, HIBPResult
 from glint.engine import dimensions
 from glint.engine import entropy
 from glint.engine import hardening
@@ -73,7 +74,9 @@ def _finding_to_dict(f: Finding) -> dict:
 def run(scan_id: str, payload: dict, remote_ip: str,
         request_headers: dict,
         clean_resolvers: list[str] | None = None,
-        weights: dict[str, float] | None = None) -> ScanResult:
+        weights: dict[str, float] | None = None,
+        hibp_api_key: str = "",
+        email: str = "") -> ScanResult:
     browser = payload.get("browser", {})
 
     headers       = analyze_headers(request_headers, browser)
@@ -96,7 +99,8 @@ def run(scan_id: str, payload: dict, remote_ip: str,
 
     dim_anonymity     = dimensions.score_anonymity(browser)
     dim_network       = dimensions.score_network(browser, headers, remote_ip, ip_rep, dns_result, stun_ip_rep)
-    dim_data_exposure = dimensions.score_data_exposure(browser)
+    hibp_result = check_email(email, hibp_api_key) if email else None
+    dim_data_exposure = dimensions.score_data_exposure(browser, hibp_result)
     dim_ip_reputation = dimensions.score_ip_reputation(ip_rep)
 
     all_dimensions = [dim_anonymity, dim_network, dim_data_exposure, dim_ip_reputation]

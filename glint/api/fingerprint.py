@@ -39,6 +39,7 @@ def receive():
 
     cfg             = current_app.config["GLINT_CONFIG"]
     request_headers = dict(request.headers)
+    email           = payload.get("email", "").strip() if isinstance(payload.get("email"), str) else ""
     result          = run_risk(
         scan_id,
         payload,
@@ -46,6 +47,8 @@ def receive():
         request_headers,
         cfg.CLEAN_RESOLVERS,
         cfg.RISK_WEIGHTS,
+        hibp_api_key=cfg.HIBP_API_KEY,
+        email=email,
     )
 
     repo = ScanRepository(cfg.DATABASE_PATH)
